@@ -7,11 +7,16 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="container" id="main-nav" style="padding-bottom: 0; margin-bottom: 1rem; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;"></div>
   
-  <div class="container" style="max-width:600px; border-top-left-radius: 0; border-top-right-radius: 0;">
+  <div class="top-panel">
+    <div class="top-panel-card">
+      <div id="main-nav"></div> 
+    </div>
+  </div>
+  
+  <div class="data-panel" style="max-width: 600px;">
     <h3 style="margin-bottom:5px;">Day-wise Criteria & Limits</h3>
-    <p style="font-size:0.9rem; color:#6b7280; margin-bottom:20px;">Restricts operations for lower-level admins (Operators) who do not have access to this tab.</p>
+    <p style="font-size:0.9rem; color:var(--text-light); margin-bottom:20px;">Restricts operations for lower-level admins (Operators) who do not have access to this tab.</p>
     
     <div id="statusMsg" style="margin-bottom: 15px; font-weight: bold; color: var(--primary);">Loading current settings...</div>
 
@@ -34,7 +39,7 @@
         <input type="number" id="setMaxMerit" placeholder="e.g. 1000">
     </div>
     
-    <button style="background:#059669; width:100%; margin-top:15px; padding:12px;" onclick="saveSettings(event)">Save Constraints</button>
+    <button class="btn-success" style="width:100%; margin-top:15px; padding:12px;" onclick="saveSettings(event)">Save Constraints</button>
   </div>
 
   <script src="js/api.js"></script>
