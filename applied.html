@@ -1,43 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Applied List | Admission Portal</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
+<head><meta charset="UTF-8"></head>
 <body>
-  
-  <div class="top-panel">
-    <div class="top-panel-card">
-      <div id="main-nav"></div> 
-      
-      <div class="action-bar">
-        <input type="text" id="appliedSearchBox" placeholder="Search applied list..." style="flex-grow:1;">
-        <button id="syncBtn">↻ Sync Database</button>
-      </div>
-
-      <div class="filter-grid" id="advancedFilters" style="margin-top: 15px; margin-bottom: 0;">
-        <select id="filterGender"><option value="">All Genders</option></select>
-        <select id="filterCategory"><option value="">All Categories</option></select>
-        <select id="filterSeatType"><option value="">All Seat Types</option></select>
-        <div class="score-range">
-          <input type="number" id="minCET" placeholder="Min PCM CET">
-          <input type="number" id="maxCET" placeholder="Max PCM CET">
-        </div>
-      </div>
-
-    </div>
-  </div>
-  
   <div class="data-panel">
     <div id="actionModalApplied"></div>
     <div id="appliedResults">Loading database and calculating Merit...</div>
     <div id="appliedPagination" style="display:flex; gap:5px; margin-top:15px; justify-content:center; flex-wrap:wrap;"></div>
   </div>
-
   <script src="js/api.js"></script>
-  <script src="js/nav.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/applied.js"></script>
 </body>
 </html>
