@@ -1,10 +1,9 @@
-let allData = { headers: [], rows: [] };
-let filteredData = [];
-let currentPage = 1;
+let allData = { headers: [], rows: [] }, filteredData = [], currentPage = 1;
 const ROWS_PER_PAGE = 50;
 
 window.onload = async () => {
-    buildNavigation('logs');
+    const actionBar = `<input type="text" id="searchBox" placeholder="Search logs..." style="flex-grow:1;"><button id="syncBtn">↻ Sync Database</button>`;
+    loadMasterLayout('Logs', 'logs', actionBar);
     document.getElementById('syncBtn').addEventListener('click', fetchData);
     document.getElementById('searchBox').addEventListener('input', handleSearch);
     await fetchData();
@@ -14,9 +13,8 @@ async function fetchData() {
     document.getElementById('results').innerHTML = '<p>Loading database...</p>';
     try {
         const data = await callAPI('getLogsData');
-        if (!data || data.length <= 1) { document.getElementById('results').innerHTML = '<p>No data yet.</p>'; return; }
-        allData.headers = data.shift(); allData.rows = data;
-        handleSearch();
+        if (!data || data.length <= 1) { document.getElementById('results').innerHTML = '<p>No data.</p>'; return; }
+        allData.headers = data.shift(); allData.rows = data; handleSearch();
     } catch (e) { document.getElementById('results').innerHTML = `<p style="color:red; font-weight:bold;">Error: ${e.message}</p>`; }
 }
 
@@ -31,23 +29,17 @@ function renderTable() {
     if(data.length === 0) return document.getElementById('results').innerHTML = '<p>No records found.</p>';
 
     let html = '<div style="overflow-x:auto;"><table><tr><th>Sr No</th>';
-    const displayCols = [1, 2, 3, 9, 19];
-    displayCols.forEach(i => html += `<th>${allData.headers[i]}</th>`);
+    const displayCols = [1, 2, 3, 9, 19]; displayCols.forEach(i => html += `<th>${allData.headers[i]}</th>`);
     html += `<th>Log Details (Prefs Snapshot)</th></tr>`;
     
     data.forEach((row, idx) => {
-        const srNo = (currentPage - 1) * ROWS_PER_PAGE + idx + 1;
-        html += `<tr><td>${srNo}</td>`; 
+        html += `<tr><td>${(currentPage - 1) * ROWS_PER_PAGE + idx + 1}</td>`; 
         displayCols.forEach(i => {
-            if (i === 2) html += `<td><b>${row[i]}</b></td>`;
-            else if (i === 9) html += `<td><span class="badge">${row[i]}</span></td>`;
-            else html += `<td>${row[i] || '-'}</td>`;
+            if (i === 2) html += `<td><b>${row[i]}</b></td>`; else if (i === 9) html += `<td><span class="badge">${row[i]}</span></td>`; else html += `<td>${row[i] || '-'}</td>`;
         });
         html += `<td><small>${[row[40],row[41],row[42]].filter(Boolean).join(', ')}...</small></td></tr>`; 
     });
-    
-    document.getElementById('results').innerHTML = html + '</table></div>';
-    renderPagination(filteredData.length);
+    document.getElementById('results').innerHTML = html + '</table></div>'; renderPagination(filteredData.length);
 }
 
 function renderPagination(total) {
