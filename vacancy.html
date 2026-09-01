@@ -1,33 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vacancy Stats | Admission Portal</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
+<head><meta charset="UTF-8"></head>
 <body>
-  
-  <div class="top-panel">
-    <div class="top-panel-card">
-      <div id="main-nav"></div> 
-      
-      <div class="action-bar">
-        <input type="text" id="searchBox" placeholder="Search branches or seat types..." style="flex-grow:1;">
-        <button class="btn-success" onclick="openAddVacancy()">+ Add Vacancy Data</button>
-        <button id="syncBtn">↻ Sync Database</button>
-      </div>
-    </div>
-  </div>
-  
   <div class="data-panel">
     <div id="actionModalVacancy"></div>
     <div id="results">Loading database...</div>
     <div id="pagination" style="display:flex; gap:5px; margin-top:15px; justify-content:center; flex-wrap:wrap;"></div>
   </div>
-
   <script src="js/api.js"></script>
-  <script src="js/nav.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/vacancy.js"></script>
 </body>
 </html>
