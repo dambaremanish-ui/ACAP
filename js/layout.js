@@ -1,5 +1,4 @@
 function loadMasterLayout(pageTitle, activeTab, actionBarHTML) {
-    // 1. Centralize the <head> elements (CSS, PWA, Favicons)
     document.head.innerHTML += `
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/style.css">
@@ -11,16 +10,11 @@ function loadMasterLayout(pageTitle, activeTab, actionBarHTML) {
     `;
     document.title = pageTitle + " | Admission Portal";
 
-    // 2. Validate Session
     const sessionStr = sessionStorage.getItem('admission_session');
-    if (!sessionStr) { 
-        window.location.href = 'index.html'; 
-        return; 
-    }
+    if (!sessionStr) { window.location.href = 'index.html'; return; }
     const session = JSON.parse(sessionStr);
     const perms = session.permissions || [];
 
-    // 3. Build Dynamic Tabs
     let tabsHTML = '';
     if (perms.includes('search')) tabsHTML += `<a href="search.html" class="tab ${activeTab === 'search' ? 'active' : ''}"><button>Search & Allocate</button></a>`;
     if (perms.includes('applied')) tabsHTML += `<a href="applied.html" class="tab ${activeTab === 'applied' ? 'active' : ''}"><button>Applied List</button></a>`;
@@ -30,7 +24,6 @@ function loadMasterLayout(pageTitle, activeTab, actionBarHTML) {
     if (perms.includes('settings')) tabsHTML += `<a href="settings.html" class="tab ${activeTab === 'settings' ? 'active' : ''}"><button>Limits & Constraints</button></a>`;
     if (perms.includes('users')) tabsHTML += `<a href="users.html" class="tab ${activeTab === 'users' ? 'active' : ''}"><button>User Management</button></a>`;
 
-    // 4. Inject the Unified Top Panel at the very beginning of the <body>
     const masterHTML = `
     <div class="top-panel">
         <div class="top-panel-card">
@@ -42,10 +35,9 @@ function loadMasterLayout(pageTitle, activeTab, actionBarHTML) {
                 </div>
             </div>
             <div class="tabs">${tabsHTML}</div>
-            <div class="action-bar">${actionBarHTML}</div>
+            <div class="action-bar" style="flex-wrap: wrap;">${actionBarHTML}</div>
         </div>
-    </div>
-    `;
+    </div>`;
     
     document.body.insertAdjacentHTML('afterbegin', masterHTML);
 }
