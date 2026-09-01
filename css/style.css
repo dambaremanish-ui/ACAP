@@ -14,16 +14,29 @@
 }
 
 /* --- Base Layout --- */
+/* --- Base Layout --- */
 body { 
     font-family: 'Inter', 'Segoe UI', system-ui, sans-serif; 
     background-color: var(--bg); 
     color: var(--text); 
     margin: 0; 
-    padding: 2rem 1rem; 
+    padding: 0 1rem 2rem 1rem; /* Removed top padding so sticky header touches the edge */
     display: flex; 
-    flex-direction: column; /* FIX: Forces containers to stack vertically */
+    flex-direction: column; 
     align-items: center; 
     min-height: 100vh;
+}
+
+/* --- Unified Navigation Design --- */
+#main-nav {
+    padding-top: 1.5rem; /* Replaces the body's top padding */
+    padding-bottom: 0; 
+    margin-bottom: 1.5rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-radius: 0 0 12px 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); /* Adds depth when scrolling over tables */
 }
 
 h2, h3, h4 { margin-top: 0; color: var(--text); }
