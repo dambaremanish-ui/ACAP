@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vacancy Stats | Admission Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container" id="main-nav" style="padding-bottom: 0; margin-bottom: 1rem; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;"></div>
+  
+  <div class="container" style="border-top-left-radius: 0; border-top-right-radius: 0;">
+    <div class="sticky-header">
+      <input type="text" id="searchBox" placeholder="Search branches or seat types..." style="flex-grow:1;">
+      <button style="background:#059669;" onclick="openAddVacancy()">+ Add Vacancy Data</button>
+      <button id="syncBtn">↻ Sync</button>
+    </div>
+    <div id="actionModalVacancy"></div>
+    <div id="results">Loading database...</div>
+    <div id="pagination" style="display:flex; gap:5px; margin-top:15px; justify-content:center; flex-wrap:wrap;"></div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/vacancy.js"></script>
+</body>
+</html>
