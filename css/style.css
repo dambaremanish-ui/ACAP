@@ -148,3 +148,48 @@ td button { padding: 6px 12px; font-size: 0.8rem; }
 
 /* --- Modals & Allocations --- */
 .pref-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 1.5rem; }
+
+/* --- Unified Top Sticky Panel --- */
+.top-panel {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    width: 100%;
+    max-width: 1300px;
+    background: var(--bg); /* Blends with the body background */
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.top-panel-card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.action-bar {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    align-items: center;
+    border-top: 1px solid var(--border);
+    padding-top: 15px;
+}
+
+/* --- Content Area --- */
+.data-panel {
+    background: var(--card-bg);
+    border-radius: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem 2rem;
+    width: 100%;
+    max-width: 1300px;
+    margin-bottom: 2rem;
+    box-sizing: border-box;
+}
+
+/* Remove old sticky headers since the whole top is now sticky */
+.sticky-header { position: static; border: none; padding: 0; margin: 0; }
