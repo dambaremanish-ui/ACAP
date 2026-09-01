@@ -126,9 +126,8 @@ function renderAppliedTable() {
         return;
     }
 
-    let html = '<div style="overflow-x:auto;"><table><tr>';
+    let html = '<div style="overflow-x:auto;"><table><tr><th>Sr No</th>';
     
-    // Build Headers
     const displayCols = [1, 2, 9, 19, 23, 47, 48]; 
     displayCols.forEach(i => {
         let arrow = sortCol === i ? (sortAsc ? ' &uarr;' : ' &darr;') : '';
@@ -137,9 +136,9 @@ function renderAppliedTable() {
     for(let i=40; i<=46; i++) html += `<th>Pref ${i-39}</th>`;
     html += '<th>Actions</th></tr>';
 
-    // Build Rows
-    data.forEach((row, rawIdx) => {
-        html += `<tr>`;
+    data.forEach((row, idx) => {
+        const srNo = (currentPage - 1) * ROWS_PER_PAGE + idx + 1;
+        html += `<tr><td>${srNo}</td>`;
         displayCols.forEach(i => {
            if(i===2) html += `<td><b>${row[i]}</b></td>`;
            else if (i===9) html += `<td><span class="badge">${row[i]}</span></td>`;
