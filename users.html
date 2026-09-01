@@ -2,35 +2,18 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>User Management | Admission Portal</title>
-  <link rel="stylesheet" href="css/style.css">
   <style>
     .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #fff; padding: 15px; border: 1px solid var(--border); border-radius: 6px; }
     .checkbox-grid label { font-weight: normal; margin-bottom: 0; display: flex; align-items: center; gap: 8px; cursor: pointer; }
   </style>
 </head>
 <body>
-  
-  <div class="top-panel">
-    <div class="top-panel-card">
-      <div id="main-nav"></div> 
-      
-      <div class="action-bar">
-        <input type="text" id="searchBox" placeholder="Search users..." style="flex-grow:1;">
-        <button style="background: #4F46E5;" onclick="openUserModal()">+ Add / Edit User</button>
-        <button id="syncBtn">↻ Sync Database</button>
-      </div>
-    </div>
-  </div>
-  
   <div class="data-panel">
     <div id="actionModalUsers"></div>
     <div id="results">Loading database...</div>
   </div>
-
   <script src="js/api.js"></script>
-  <script src="js/nav.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/users.js"></script>
 </body>
 </html>
