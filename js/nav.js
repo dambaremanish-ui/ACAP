@@ -30,10 +30,20 @@ function buildNavigation(activePage) {
         const isActive = activePage === 'applied' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
         html += `<a href="applied.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Applied List</button></a>`;
     }
+
+    if (perms.includes('admitted')) {
+        const isActive = activePage === 'admitted' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
+        html += `<a href="admitted.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Admitted</button></a>`;
+    }
+    if (perms.includes('logs')) {
+        const isActive = activePage === 'logs' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
+        html += `<a href="logs.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Logs</button></a>`;
+    }
+    if (perms.includes('vacancy')) {
+        const isActive = activePage === 'vacancy' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
+        html += `<a href="vacancy.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Vacancy Stats</button></a>`;
+    }
     /*
-    if (perms.includes('admitted')) html += `<a href="admitted.html"...>Admitted</a>`;
-    if (perms.includes('logs')) html += `<a href="logs.html"...>Logs</a>`;
-    if (perms.includes('vacancy')) html += `<a href="vacancy.html"...>Vacancy Stats</a>`;
     if (perms.includes('settings')) html += `<a href="settings.html"...>Limits & Constraints</a>`;
     if (perms.includes('users')) html += `<a href="users.html"...>User Management</a>`;
     */
