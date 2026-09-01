@@ -26,15 +26,17 @@ function buildNavigation(activePage) {
         html += `<a href="search.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Search & Allocate</button></a>`;
     }
     
-    // We will uncomment these as we build the other pages
-    
-    if (perms.includes('applied')) html += `<a href="applied.html"...>Applied List</a>`;
+    if (perms.includes('applied')) {
+        const isActive = activePage === 'applied' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
+        html += `<a href="applied.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Applied List</button></a>`;
+    }
+    /*
     if (perms.includes('admitted')) html += `<a href="admitted.html"...>Admitted</a>`;
     if (perms.includes('logs')) html += `<a href="logs.html"...>Logs</a>`;
     if (perms.includes('vacancy')) html += `<a href="vacancy.html"...>Vacancy Stats</a>`;
     if (perms.includes('settings')) html += `<a href="settings.html"...>Limits & Constraints</a>`;
     if (perms.includes('users')) html += `<a href="users.html"...>User Management</a>`;
-    
+    */
 
     html += `</div>`;
     navDiv.innerHTML = html;
