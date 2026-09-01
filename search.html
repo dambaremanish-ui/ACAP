@@ -2,29 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Search & Allocate | Admission Portal</title>
-  <link rel="stylesheet" href="css/style.css">
+  <!-- CSS, PWA, and Favicons are now injected automatically by layout.js -->
 </head>
 <body>
   
-  <!-- 1. THE UNIFIED STICKY HEADER -->
-  <div class="top-panel">
-    <div class="top-panel-card">
-      
-      <!-- Nav, User, and Logout injected here automatically -->
-      <div id="main-nav"></div> 
-      
-      <!-- Search and Action Buttons belong here now -->
-      <div class="action-bar">
-        <input type="text" id="searchBox" placeholder="Search by student name..." style="flex-grow:1;">
-        <button id="syncBtn">↻ Sync Database</button>
-      </div>
-
-    </div>
-  </div>
-  
-  <!-- 2. THE SCROLLABLE DATA AREA -->
+  <!-- Sub-page specific data area -->
   <div class="data-panel">
     <div id="actionModal"></div>
     <div id="results">Loading database securely...</div>
@@ -32,7 +14,7 @@
   </div>
 
   <script src="js/api.js"></script>
-  <script src="js/nav.js"></script>
+  <script src="js/layout.js"></script>
   <script src="js/search.js"></script>
 </body>
 </html>
