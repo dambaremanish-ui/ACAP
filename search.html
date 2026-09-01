@@ -7,15 +7,25 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <!-- Navigation gets injected here -->
-  <div class="container" id="main-nav" style="padding-bottom: 0; margin-bottom: 1rem; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;"></div>
   
-  <div class="container" style="border-top-left-radius: 0; border-top-right-radius: 0;">
-    <div style="position: sticky; top: -32px; background: var(--card-bg); z-index: 10; padding: 15px 0; border-bottom: 1px solid var(--border); margin-bottom: 15px; display: flex; gap: 10px;">
-      <input type="text" id="searchBox" placeholder="Search by student name..." style="flex-grow:1;">
-      <button id="syncBtn" style="padding: 10px 15px; margin: 0;">↻ Sync</button>
+  <!-- 1. THE UNIFIED STICKY HEADER -->
+  <div class="top-panel">
+    <div class="top-panel-card">
+      
+      <!-- Nav, User, and Logout injected here automatically -->
+      <div id="main-nav"></div> 
+      
+      <!-- Search and Action Buttons belong here now -->
+      <div class="action-bar">
+        <input type="text" id="searchBox" placeholder="Search by student name..." style="flex-grow:1;">
+        <button id="syncBtn">↻ Sync Database</button>
+      </div>
+
     </div>
-    
+  </div>
+  
+  <!-- 2. THE SCROLLABLE DATA AREA -->
+  <div class="data-panel">
     <div id="actionModal"></div>
     <div id="results">Loading database securely...</div>
     <div id="studentPagination" style="display:flex; gap:5px; margin-top:15px; justify-content:center; flex-wrap:wrap;"></div>
