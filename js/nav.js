@@ -10,44 +10,37 @@ function buildNavigation(activePage) {
     const navDiv = document.getElementById('main-nav');
 
     let html = `
-        <div class="dashboard-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; padding-bottom:15px; border-bottom:1px solid var(--border);">
-            <h2 style="margin:0;">Admission System</h2>
+        <div class="dashboard-header">
+            <h2 style="margin:0; color: var(--primary);">Admission System</h2>
             <div style="display:flex; align-items:center;">
-                <span style="background:#e5e7eb; padding:4px 10px; border-radius:20px; font-size:0.8rem; font-weight:bold; color:#374151; margin-right:15px;">${session.role}</span>
-                <button onclick="logout()" style="background:#dc2626; padding:6px 15px; margin:0;">Logout</button>
+                <span class="role-badge">${session.role}</span>
+                <button class="btn-danger" onclick="logout()">Logout</button>
             </div>
         </div>
-        <div class="tabs" style="display:flex; gap:10px; margin-bottom:1.5rem; border-bottom:2px solid var(--border); padding-bottom:10px; flex-wrap:wrap;">
+        <div class="tabs">
     `;
 
-    // Render tabs based on role permissions
+    // Render tabs dynamically using clean CSS classes
     if (perms.includes('search')) {
-        const isActive = activePage === 'search' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
-        html += `<a href="search.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Search & Allocate</button></a>`;
+        html += `<a href="search.html" class="tab ${activePage === 'search' ? 'active' : ''}"><button>Search & Allocate</button></a>`;
     }
     if (perms.includes('applied')) {
-        const isActive = activePage === 'applied' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
-        html += `<a href="applied.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Applied List</button></a>`;
+        html += `<a href="applied.html" class="tab ${activePage === 'applied' ? 'active' : ''}"><button>Applied List</button></a>`;
     }
     if (perms.includes('admitted')) {
-        const isActive = activePage === 'admitted' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
-        html += `<a href="admitted.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Admitted</button></a>`;
+        html += `<a href="admitted.html" class="tab ${activePage === 'admitted' ? 'active' : ''}"><button>Admitted</button></a>`;
     }
     if (perms.includes('logs')) {
-        const isActive = activePage === 'logs' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
-        html += `<a href="logs.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Logs</button></a>`;
+        html += `<a href="logs.html" class="tab ${activePage === 'logs' ? 'active' : ''}"><button>Logs</button></a>`;
     }
     if (perms.includes('vacancy')) {
-        const isActive = activePage === 'vacancy' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
-        html += `<a href="vacancy.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Vacancy Stats</button></a>`;
+        html += `<a href="vacancy.html" class="tab ${activePage === 'vacancy' ? 'active' : ''}"><button>Vacancy Stats</button></a>`;
     }
     if (perms.includes('settings')) {
-        const isActive = activePage === 'settings' ? 'background:var(--primary); color:white;' : 'background:transparent; color:var(--text);';
-        html += `<a href="settings.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Limits & Constraints</button></a>`;
+        html += `<a href="settings.html" class="tab ${activePage === 'settings' ? 'active' : ''}"><button>Limits & Constraints</button></a>`;
     }
     if (perms.includes('users')) {
-        const isActive = activePage === 'users' ? 'background:#fef3c7; color:#3730a3; border:1px solid #c7d2fe;' : 'background:transparent; color:var(--text);';
-        html += `<a href="users.html" style="text-decoration:none;"><button style="${isActive} border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">User Management</button></a>`;
+        html += `<a href="users.html" class="tab ${activePage === 'users' ? 'active' : ''}"><button>User Management</button></a>`;
     }
 
     html += `</div>`;
