@@ -85,12 +85,12 @@ function renderTable() {
         return;
     }
     
-    let html = '<div style="overflow-x:auto;"><table><tr><th>App ID</th><th>Name</th><th>Gender</th><th>Category</th><th>Seat Type</th><th>CET Score</th><th>JEE Score</th><th>Action</th></tr>';
-    data.forEach(r => {
+    let html = '<div style="overflow-x:auto;"><table><tr><th>Sr No</th><th>App ID</th><th>Name</th><th>Gender</th><th>Category</th><th>Seat Type</th><th>CET Score</th><th>JEE Score</th><th>Action</th></tr>';
+    data.forEach((r, idx) => {
+        const srNo = (currentPage - 1) * ROWS_PER_PAGE + idx + 1;
         const seatType = r[9] || generateSeatType(r[3], r[8], r[6]); 
-        // We pass the raw App ID to accurately identify the student globally
-        html += `<tr><td>${r[1]}</td><td><strong>${r[2]}</strong></td><td>${r[3]}</td><td>${r[8]}</td>
-                 <td><span style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:12px; font-size:0.8rem; font-weight:bold;">${seatType}</span></td>
+        html += `<tr><td>${srNo}</td><td>${r[1]}</td><td><strong>${r[2]}</strong></td><td>${r[3]}</td><td>${r[8]}</td>
+                 <td><span class="badge" style="background:#e0e7ff; color:#4338ca; padding:2px 8px; border-radius:12px;">${seatType}</span></td>
                  <td>${r[19] || '-'}</td><td>${r[23] || '-'}</td>
                  <td><button onclick="openAllocation('${r[1]}')">Allocate</button></td></tr>`;
     });
