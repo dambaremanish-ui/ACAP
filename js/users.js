@@ -27,10 +27,12 @@ function handleSearch() {
 function renderTable() {
     if(filteredUsers.length === 0) return document.getElementById('results').innerHTML = '<p>No users found.</p>';
 
-    let html = '<div style="overflow-x:auto;"><table><tr><th>Username</th><th>Password</th><th>Role Level</th><th>Allowed Tabs</th><th>Actions</th></tr>';
+    let html = '<div style="overflow-x:auto;"><table><tr><th>Sr No</th><th>Username</th><th>Password</th><th>Role Level</th><th>Allowed Tabs</th><th>Actions</th></tr>';
     
-    filteredUsers.forEach(row => {
+    // User list is not paginated, so standard index applies
+    filteredUsers.forEach((row, idx) => {
         html += `<tr>
+            <td>${idx + 1}</td>
             <td><b>${row.username}</b></td>
             <td>${row.password}</td>
             <td><span class="badge">${row.role}</span></td>
