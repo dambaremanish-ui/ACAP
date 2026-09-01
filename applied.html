@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Applied List | Admission Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin-bottom: 15px; background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
+    .score-range { display: flex; gap: 5px; }
+  </style>
+</head>
+<body>
+  <div class="container" id="main-nav" style="padding-bottom: 0; margin-bottom: 1rem; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;"></div>
+  
+  <div class="container" style="border-top-left-radius: 0; border-top-right-radius: 0;">
+    <div class="sticky-header">
+      <input type="text" id="appliedSearchBox" placeholder="Search applied list..." style="flex-grow:1;">
+      <button id="syncBtn">↻ Sync</button>
+    </div>
+    
+    <div class="filter-grid" id="advancedFilters">
+      <select id="filterGender"><option value="">All Genders</option></select>
+      <select id="filterCategory"><option value="">All Categories</option></select>
+      <select id="filterSeatType"><option value="">All Seat Types</option></select>
+      <div class="score-range">
+        <input type="number" id="minCET" placeholder="Min PCM CET">
+        <input type="number" id="maxCET" placeholder="Max PCM CET">
+      </div>
+    </div>
+    
+    <div id="actionModalApplied"></div>
+    <div id="appliedResults">Loading database and calculating Merit...</div>
+    <div id="appliedPagination" style="display:flex; gap:5px; margin-top:15px; justify-content:center; flex-wrap:wrap;"></div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/nav.js"></script>
+  <script src="js/applied.js"></script>
+</body>
+</html>
