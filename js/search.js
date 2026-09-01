@@ -53,10 +53,13 @@ function handleSearch() {
     let limitDate = null, todayDate = null, minCET = null, maxCET = null;
     
     if (enforceLimits) {
-        limitDate = adminSettings.limitDate || null;
-        if (limitDate) {
-            const d = new Date();
-            todayDate = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        if (adminSettings.limitDate) {
+            // FIX: Safely parse Google's ISO timestamp into YYYY-MM-DD
+            const sd = new Date(adminSettings.limitDate);
+            limitDate = sd.getFullYear() + '-' + String(sd.getMonth()+1).padStart(2,'0') + '-' + String(sd.getDate()).padStart(2,'0');
+            
+            const td = new Date();
+            todayDate = td.getFullYear() + '-' + String(td.getMonth()+1).padStart(2,'0') + '-' + String(td.getDate()).padStart(2,'0');
         }
         minCET = adminSettings.minCET ? parseFloat(adminSettings.minCET) : null;
         maxCET = adminSettings.maxCET ? parseFloat(adminSettings.maxCET) : null;
