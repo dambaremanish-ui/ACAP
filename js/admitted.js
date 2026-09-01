@@ -37,13 +37,14 @@ function renderTable() {
     const data = filteredData.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
     if(data.length === 0) return document.getElementById('results').innerHTML = '<p>No records found.</p>';
 
-    let html = '<div style="overflow-x:auto;"><table><tr>';
+    let html = '<div style="overflow-x:auto;"><table><tr><th>Sr No</th>';
     const displayCols = [1, 2, 3, 9, 19];
     displayCols.forEach(i => html += `<th>${allData.headers[i]}</th>`);
     html += `<th>${allData.headers[40]}</th><th>Actions</th></tr>`;
     
-    data.forEach(row => {
-        html += '<tr>'; 
+    data.forEach((row, idx) => {
+        const srNo = (currentPage - 1) * ROWS_PER_PAGE + idx + 1;
+        html += `<tr><td>${srNo}</td>`; 
         displayCols.forEach(i => {
             if (i === 2) html += `<td><b>${row[i]}</b></td>`;
             else if (i === 9) html += `<td><span class="badge">${row[i]}</span></td>`;
