@@ -7,7 +7,16 @@ const ROWS_PER_PAGE = 50;
 let sessionData = {};
 
 window.onload = async () => {
-    buildNavigation('search');
+    // 1. Define the Action Bar for this specific page
+    const actionBar = `
+        <input type="text" id="searchBox" placeholder="Search by student name..." style="flex-grow:1;">
+        <button id="syncBtn">↻ Sync Database</button>
+    `;
+    
+    // 2. Load the Master Layout (Title, Active Tab, Action Bar HTML)
+    loadMasterLayout('Search & Allocate', 'search', actionBar);
+    
+    // 3. Attach listeners and load data
     sessionData = JSON.parse(sessionStorage.getItem('admission_session'));
     document.getElementById('syncBtn').addEventListener('click', fetchInitialData);
     document.getElementById('searchBox').addEventListener('input', handleSearch);
