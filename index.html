@@ -1,1 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login | Admission Portal</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="container login-container">
+    <h2 style="text-align: center; margin-top: 0; margin-bottom: 20px;">Admin Login</h2>
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="user" placeholder="Enter username" autocomplete="off">
+    </div>
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="pass" placeholder="Enter password">
+    </div>
+    <button id="loginBtn">Secure Login</button>
+    <p id="errorMsg" style="color: #dc2626; text-align: center; font-size: 0.85rem; margin-top: 10px;"></p>
+  </div>
 
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>
