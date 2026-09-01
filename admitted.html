@@ -7,13 +7,19 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <div class="container" id="main-nav" style="padding-bottom: 0; margin-bottom: 1rem; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;"></div>
   
-  <div class="container" style="border-top-left-radius: 0; border-top-right-radius: 0;">
-    <div class="sticky-header">
-      <input type="text" id="searchBox" placeholder="Search admitted students..." style="flex-grow:1;">
-      <button id="syncBtn">↻ Sync</button>
+  <div class="top-panel">
+    <div class="top-panel-card">
+      <div id="main-nav"></div> 
+      
+      <div class="action-bar">
+        <input type="text" id="searchBox" placeholder="Search admitted students..." style="flex-grow:1;">
+        <button id="syncBtn">↻ Sync Database</button>
+      </div>
     </div>
+  </div>
+  
+  <div class="data-panel">
     <div id="results">Loading database...</div>
     <div id="pagination" style="display:flex; gap:5px; margin-top:15px; justify-content:center; flex-wrap:wrap;"></div>
   </div>
