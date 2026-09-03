@@ -1,6 +1,7 @@
 let allStudents = [], masterOptions = [], adminSettings = {}, filteredStudents = [];
 let currentPage = 1, sessionData = {};
 const ROWS_PER_PAGE = 50;
+let sortCol = -1, sortAsc = true;
 
 window.onload = async () => {
     const actionBar = `<input type="text" id="searchBox" placeholder="Search by student name..." style="flex-grow:1;"><button id="syncBtn">↻ Sync Database</button>`;
@@ -64,7 +65,25 @@ function handleSearch() {
         return true;
     });
 
-    currentPage = 1; renderTable();
+    currentPage = 1; sortStudentData(); renderTable();
+}
+
+function setSort(idx) { 
+    if (sortCol === idx) sortAsc = !sortAsc; 
+    else { sortCol = idx; sortAsc = true; } 
+    sortStudentData(); renderTable(); 
+}
+
+function sortStudentData() {
+    if(sortCol === -1) return;
+    filteredStudents.sort((a, b) => {
+        let vA = a[sortCol], vB = b[sortCol];
+        if (vA !== "" && vB !== "" && !isNaN(vA) && !isNaN(vB)) { vA = Number(vA); vB = Number(vB); } 
+        else { vA = vA ? vA.toString().toLowerCase() : ''; vB = vB ? vB.toString().toLowerCase() : ''; }
+        if(vA < vB) return sortAsc ? -1 : 1; 
+        if(vA > vB) return sortAsc ? 1 : -1; 
+        return 0;
+    });
 }
 
 function renderTable() {
@@ -74,19 +93,27 @@ function renderTable() {
         document.getElementById('studentPagination').innerHTML = ''; return;
     }
     
-    let html = '<div style="overflow-x:auto;"><table><tr><th>Sr No</th><th>App ID</th><th>Name</th><th>Gender</th><th>Category</th><th>Seat Type</th><th>CET</th><th>JEE</th><th>Action</th></tr>';
-    data.forEach((r, idx) => {
-        const srNo = (currentPage - 1) * ROWS_PER_PAGE + idx + 1;
+    let html = `<div style="overflow-x:auto;"><table><tr>`;
+    
+    const displayCols = [0, 1, 2, 3, 8, 9, 19, 23];
+    const colNames = {0:'Merit No', 1:'App ID', 2:'Name', 3:'Gender', 8:'Category', 9:'Seat Type', 19:'CET', 23:'JEE'};
+    
+    displayCols.forEach(i => { 
+        html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]} ${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; 
+    });
+    html += `<th>Action</th></tr>`;
+    
+    data.forEach((r) => {
         const seatType = r[9] || generateSeatType(r[3], r[8], r[6]); 
-        html += `<tr><td>${srNo}</td><td>${r[1]}</td><td><strong>${r[2]}</strong></td><td>${r[3]}</td><td>${r[8]}</td>
+        html += `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td><strong>${r[2]}</strong></td><td>${r[3]}</td><td>${r[8]}</td>
                  <td><span class="badge">${seatType}</span></td><td>${r[19] || '-'}</td><td>${r[23] || '-'}</td>
                  <td><button onclick="openAllocation('${r[1]}')">Allocate</button></td></tr>`;
     });
+    
     document.getElementById('results').innerHTML = html + '</table></div>';
     renderPagination(filteredStudents.length);
 }
 
-// ... existing search.js code ...
 function openAllocation(appId) {
     const student = allStudents.find(r => r[1] === appId); if (!student) return;
     const autoSeatType = student[9] || generateSeatType(student[3], student[8], student[6]);
@@ -106,17 +133,6 @@ function openAllocation(appId) {
     document.getElementById('actionModal').innerHTML = html; updateDropdowns(); window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function submitAllocation(appId, e) {
-    let prefs = []; if(!document.getElementById('pref1').value) return alert('Preference 1 is required.');
-    for(let i=1; i<=7; i++) prefs.push(document.getElementById(`pref${i}`).value || "");
-    const quota = document.getElementById('allocQuota').value;
-    const student = allStudents.find(r => r[1] === appId); while(student.length < 40) student.push(""); 
-    student[4] = document.getElementById('allocMobile').value; student[5] = document.getElementById('allocEmail').value; student[9] = document.getElementById('allocSeatType').value;
-    e.target.innerText = 'Transmitting...'; e.target.disabled = true;
-    try { await callAPI('allocateStudent', { student: student, prefs: prefs, quota: quota }); alert('Moved to Visited List.'); document.getElementById('actionModal').innerHTML = ''; await fetchInitialData(); } 
-    catch (err) { alert("Error: " + err.message); e.target.innerText = 'Confirm & Move to Visited List'; e.target.disabled = false; }
-}
-
 function updateDropdowns() {
     const selects = document.querySelectorAll('.alloc-select');
     const selectedVals = Array.from(selects).map(s => s.value).filter(v => v !== "");
@@ -129,6 +145,17 @@ function updateDropdowns() {
             }
         });
     });
+}
+
+async function submitAllocation(appId, e) {
+    let prefs = []; if(!document.getElementById('pref1').value) return alert('Preference 1 is required.');
+    for(let i=1; i<=7; i++) prefs.push(document.getElementById(`pref${i}`).value || "");
+    const quota = document.getElementById('allocQuota').value;
+    const student = allStudents.find(r => r[1] === appId); while(student.length < 40) student.push(""); 
+    student[4] = document.getElementById('allocMobile').value; student[5] = document.getElementById('allocEmail').value; student[9] = document.getElementById('allocSeatType').value;
+    e.target.innerText = 'Transmitting...'; e.target.disabled = true;
+    try { await callAPI('allocateStudent', { student: student, prefs: prefs, quota: quota }); alert('Moved to Visited List.'); document.getElementById('actionModal').innerHTML = ''; await fetchInitialData(); } 
+    catch (err) { alert("Error: " + err.message); e.target.innerText = 'Confirm & Move to Visited List'; e.target.disabled = false; }
 }
 
 function renderPagination(total) {
