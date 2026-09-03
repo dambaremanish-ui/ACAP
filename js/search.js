@@ -86,26 +86,35 @@ function renderTable() {
     renderPagination(filteredStudents.length);
 }
 
+// ... existing search.js code ...
 function openAllocation(appId) {
-    const student = allStudents.find(r => r[1] === appId);
-    if (!student) return;
+    const student = allStudents.find(r => r[1] === appId); if (!student) return;
     const autoSeatType = student[9] || generateSeatType(student[3], student[8], student[6]);
     let html = `<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                    <h4 style="margin:0;">Allocate: <span style="color:var(--primary)">${student[2]}</span></h4>
-                    <button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModal').innerHTML=''">Cancel</button>
-                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h4 style="margin:0;">Allocate: <span style="color:var(--primary)">${student[2]}</span></h4><button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModal').innerHTML=''">Cancel</button></div>
                 <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#e0e7ff; padding:10px; border-radius:6px;">
                     <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Mobile</label><input type="text" id="allocMobile" value="${student[4] || ''}"></div>
                     <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Email</label><input type="text" id="allocEmail" value="${student[5] || ''}"></div>
                     <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Seat Type</label><input type="text" id="allocSeatType" value="${autoSeatType}"></div>
+                    <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Admission Quota</label>
+                        <select id="allocQuota" style="width:100%;"><option value="ACAP">ACAP</option><option value="Institute Level">Institute Level</option></select>
+                    </div>
                 </div>
                 <div class="pref-grid">`;
-    for(let i=1; i<=7; i++) {
-        html += `<div><label style="display:block; font-size:0.875rem; font-weight:600; margin-bottom:0.5rem;">Pref ${i}</label><select id="pref${i}" class="alloc-select" onchange="updateDropdowns()"><option value="">-- Select --</option></select></div>`;
-    }
-    html += `</div><button class="btn-success" onclick="submitAllocation('${appId}', event)" style="width:100%; padding:12px;">Confirm Details & Save to Applied</button></div>`;
+    for(let i=1; i<=7; i++) { html += `<div><label style="display:block; font-weight:600; margin-bottom:0.5rem;">Pref ${i}</label><select id="pref${i}" class="alloc-select" onchange="updateDropdowns()"><option value="">-- Select --</option></select></div>`; }
+    html += `</div><button class="btn-success" onclick="submitAllocation('${appId}', event)" style="width:100%; padding:12px;">Confirm & Move to Visited List</button></div>`;
     document.getElementById('actionModal').innerHTML = html; updateDropdowns(); window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function submitAllocation(appId, e) {
+    let prefs = []; if(!document.getElementById('pref1').value) return alert('Preference 1 is required.');
+    for(let i=1; i<=7; i++) prefs.push(document.getElementById(`pref${i}`).value || "");
+    const quota = document.getElementById('allocQuota').value;
+    const student = allStudents.find(r => r[1] === appId); while(student.length < 40) student.push(""); 
+    student[4] = document.getElementById('allocMobile').value; student[5] = document.getElementById('allocEmail').value; student[9] = document.getElementById('allocSeatType').value;
+    e.target.innerText = 'Transmitting...'; e.target.disabled = true;
+    try { await callAPI('allocateStudent', { student: student, prefs: prefs, quota: quota }); alert('Moved to Visited List.'); document.getElementById('actionModal').innerHTML = ''; await fetchInitialData(); } 
+    catch (err) { alert("Error: " + err.message); e.target.innerText = 'Confirm & Move to Visited List'; e.target.disabled = false; }
 }
 
 function updateDropdowns() {
@@ -120,20 +129,6 @@ function updateDropdowns() {
             }
         });
     });
-}
-
-async function submitAllocation(appId, e) {
-    let prefs = []; 
-    if(!document.getElementById('pref1').value) return alert('Preference 1 is required.');
-    for(let i=1; i<=7; i++) prefs.push(document.getElementById(`pref${i}`).value || "");
-    const student = allStudents.find(r => r[1] === appId);
-    while(student.length < 40) student.push(""); 
-    student[4] = document.getElementById('allocMobile').value; student[5] = document.getElementById('allocEmail').value; student[9] = document.getElementById('allocSeatType').value;
-    e.target.innerText = 'Transmitting securely...'; e.target.disabled = true;
-    try {
-        await callAPI('allocateStudent', { student: student, prefs: prefs });
-        alert('Student moved to Applied List.'); document.getElementById('actionModal').innerHTML = ''; await fetchInitialData();
-    } catch (err) { alert("Error: " + err.message); e.target.innerText = 'Confirm Details & Save to Applied'; e.target.disabled = false; }
 }
 
 function renderPagination(total) {
