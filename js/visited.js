@@ -18,28 +18,32 @@ window.onload = async () => {
 };
 
 async function fetchVisitedData() {
-    document.getElementById('visitedResults').innerHTML = '<p>Loading and Calculating Merit (OMS Last)...</p>';
+    document.getElementById('visitedResults').innerHTML = '<p>Loading and Calculating Merit (HSC > Diploma > OMS Last)...</p>';
     try {
         const data = await callAPI('getVisitedData');
         if (!data.rows || data.rows.length <= 1) { document.getElementById('visitedResults').innerHTML = '<p>No data.</p>'; return; }
         let headers = data.rows.shift();
         
-        // --- NEW MERIT LOGIC (OMS LAST) ---
+        // --- UPDATED MERIT LOGIC (HSC > Diploma > OMS) ---
         let meritCalc = data.rows.map((r, i) => {
+            let qual = (r[15] || '').toString().toUpperCase(); // Column P is index 15
             return {
                 idx: i,
-                isOMS: generateSeatType(r[3], r[8], r[6]) === 'OMS' ? 1 : 0, // OMS goes to bottom
+                isDiploma: qual.includes('DIPLOMA') ? 1 : 0, // HSC is 0 (Top), Diploma is 1 (Bottom)
+                isOMS: generateSeatType(r[3], r[8], r[6]) === 'OMS' ? 1 : 0, 
                 cet: parseFloat(r[19]) || 0,
                 jee: parseFloat(r[23]) || 0
             }
         });
-        // Sort: Non-OMS first (0 before 1), then CET descending, then JEE descending
+        
         meritCalc.sort((a, b) => {
-            if (a.isOMS !== b.isOMS) return a.isOMS - b.isOMS;
-            if (b.cet !== a.cet) return b.cet - a.cet;
-            return b.jee - a.jee;
+            if (a.isDiploma !== b.isDiploma) return a.isDiploma - b.isDiploma; // 1. HSC vs Diploma
+            if (a.isOMS !== b.isOMS) return a.isOMS - b.isOMS;                 // 2. Non-OMS vs OMS
+            if (b.cet !== a.cet) return b.cet - a.cet;                         // 3. CET Score
+            return b.jee - a.jee;                                              // 4. JEE Score
         });
-        // Assign College Merit Number to Column 52 (Index 51)
+        
+        // Assign College Merit Number to Index 52
         meritCalc.forEach((item, rank) => data.rows[item.idx][52] = rank + 1);
 
         allVisited = { headers: headers, rows: data.rows };
