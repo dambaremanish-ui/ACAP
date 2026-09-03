@@ -81,16 +81,24 @@ function renderVisitedTable() {
     const data = filteredVisited.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
     if(data.length === 0) return document.getElementById('visitedResults').innerHTML = '<p>No records match criteria.</p>';
 
-    let html = '<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(52)">Merit No ${sortCol === 51 ? (sortAsc ? "↑" : "↓") : ""}</th>';
-    const displayCols = [1, 2, 9, 19, 47, 49]; // Added Quota and Status
+    // FIX: Using backticks (``) instead of single quotes ('') so the template expression evaluates correctly
+    let html = `<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(52)">Merit No ${sortCol === 52 ? (sortAsc ? "↑" : "↓") : ""}</th>`;
+    
+    const displayCols = [1, 2, 9, 19, 47, 49]; 
     const colNames = {1:'App ID', 2:'Name', 9:'Seat Type', 19:'CET', 47:'Quota', 49:'Status'};
-    displayCols.forEach(i => { html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]}${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; });
+    
+    displayCols.forEach(i => { 
+        html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]}${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; 
+    });
     html += '<th>Actions</th></tr>';
 
     data.forEach((row, idx) => {
         html += `<tr><td><strong>${row[52]}</strong></td>`;
         displayCols.forEach(i => {
-           if(i===2) html += `<td><b>${row[i]}</b></td>`; else if (i===9 || i===47) html += `<td><span class="badge">${row[i]}</span></td>`; else if (i===49) html += `<td><b>${row[i]}</b></td>`; else html += `<td>${row[i] || '-'}</td>`;
+           if(i===2) html += `<td><b>${row[i]}</b></td>`; 
+           else if (i===9 || i===47) html += `<td><span class="badge">${row[i]}</span></td>`; 
+           else if (i===49) html += `<td><b>${row[i]}</b></td>`; 
+           else html += `<td>${row[i] || '-'}</td>`;
         });
         const absoluteIndex = allVisited.rows.indexOf(row);
         
@@ -99,10 +107,14 @@ function renderVisitedTable() {
             html += `<button style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="openEditForm(${absoluteIndex})">Edit</button>`;
             html += `<button class="btn-danger" style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="markNotInterested('${row[1]}')">Not Interested</button>`;
             html += `<button class="btn-success" style="padding:6px; font-size:0.8rem;" onclick="openAdmitForm('${row[1]}')">Admit</button>`;
-        } else { html += `<span style="color:#6b7280; font-size:0.8rem;">Locked</span>`; }
+        } else { 
+            html += `<span style="color:#6b7280; font-size:0.8rem;">Locked</span>`; 
+        }
         html += `</td></tr>`;
     });
-    document.getElementById('visitedResults').innerHTML = html + '</table></div>'; renderPagination(filteredVisited.length);
+    
+    document.getElementById('visitedResults').innerHTML = html + '</table></div>'; 
+    renderPagination(filteredVisited.length);
 }
 
 // -- Not Interested Logic --
