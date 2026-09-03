@@ -16,13 +16,27 @@ async function fetchReportData() {
     try {
         const data = await callAPI('getVisitedData');
         if (data.rows && data.rows.length > 1) {
-            data.rows.shift(); // Remove headers
+            data.rows.shift(); 
             
-            // Calculate Global Merit Exactly like Visited List to match numbers
-            let meritCalc = data.rows.map((r, i) => ({
-                idx: i, isOMS: generateSeatType(r[3], r[8], r[6]) === 'OMS' ? 1 : 0, cet: parseFloat(r[19]) || 0, jee: parseFloat(r[23]) || 0
-            }));
-            meritCalc.sort((a, b) => { if (a.isOMS !== b.isOMS) return a.isOMS - b.isOMS; if (b.cet !== a.cet) return b.cet - a.cet; return b.jee - a.jee; });
+            // --- UPDATED MERIT LOGIC (HSC > Diploma > OMS) ---
+            let meritCalc = data.rows.map((r, i) => {
+                let qual = (r[15] || '').toString().toUpperCase();
+                return {
+                    idx: i, 
+                    isDiploma: qual.includes('DIPLOMA') ? 1 : 0,
+                    isOMS: generateSeatType(r[3], r[8], r[6]) === 'OMS' ? 1 : 0, 
+                    cet: parseFloat(r[19]) || 0, 
+                    jee: parseFloat(r[23]) || 0
+                }
+            });
+            
+            meritCalc.sort((a, b) => { 
+                if (a.isDiploma !== b.isDiploma) return a.isDiploma - b.isDiploma;
+                if (a.isOMS !== b.isOMS) return a.isOMS - b.isOMS; 
+                if (b.cet !== a.cet) return b.cet - a.cet; 
+                return b.jee - a.jee; 
+            });
+            
             meritCalc.forEach((item, rank) => data.rows[item.idx][52] = rank + 1);
             
             visitedRows = data.rows;
