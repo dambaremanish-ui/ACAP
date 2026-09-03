@@ -23,7 +23,7 @@ async function fetchReportData() {
                 idx: i, isOMS: generateSeatType(r[3], r[8], r[6]) === 'OMS' ? 1 : 0, cet: parseFloat(r[19]) || 0, jee: parseFloat(r[23]) || 0
             }));
             meritCalc.sort((a, b) => { if (a.isOMS !== b.isOMS) return a.isOMS - b.isOMS; if (b.cet !== a.cet) return b.cet - a.cet; return b.jee - a.jee; });
-            meritCalc.forEach((item, rank) => data.rows[item.idx][51] = rank + 1);
+            meritCalc.forEach((item, rank) => data.rows[item.idx][52] = rank + 1);
             
             visitedRows = data.rows;
             generateReport();
