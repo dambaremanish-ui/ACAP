@@ -46,7 +46,22 @@ async function fetchReportData() {
 }
 
 function buildTableHTML(title, quotaFilter, dateFilter) {
-    const data = visitedRows.filter(r => r[51] === dateFilter && r[47] === quotaFilter); // 51 is Visit Date, 47 is Quota
+    // 1. Filter with robust Date formatting and Quota matching
+    const data = visitedRows.filter(r => {
+        if (!r[51] || !r[47]) return false; // Skip if Date (51) or Quota (47) is missing
+        
+        // Safely parse Google's Timestamp into YYYY-MM-DD
+        let rowDateStr = "";
+        const d = new Date(r[51]);
+        if (!isNaN(d.getTime())) {
+            rowDateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        } else {
+            rowDateStr = r[51].toString().split('T')[0]; // Fallback string split
+        }
+        
+        // Compare dates and safely compare Quotas (ignoring case/spaces)
+        return rowDateStr === dateFilter && r[47].toString().trim().toUpperCase() === quotaFilter.toUpperCase();
+    });
     
     let html = `<div class="print-header">${title}</div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-weight:bold; font-size:14px;">
@@ -63,17 +78,19 @@ function buildTableHTML(title, quotaFilter, dateFilter) {
                         <th style="border: 1px solid black; padding: 5px;">Allotted<br>Branch</th>
                         <th style="border: 1px solid black; padding: 5px;">Reason for<br>Not Admission</th>
                     </tr>`;
-    if(data.length === 0) { html += `<tr><td colspan="8" style="padding:10px;">No students attended under this quota on this date.</td></tr>`; }
-    else {
+                    
+    if(data.length === 0) { 
+        html += `<tr><td colspan="8" style="padding:10px;">No students attended under this quota on this date.</td></tr>`; 
+    } else {
         data.forEach((r, i) => {
             let admitted = r[49] === 'Admitted' ? 'Yes' : 'No';
             let branch = r[50] || '-';
-            let reason = r[48] || '-'; // Remark column
+            let reason = r[48] || '-'; 
             html += `<tr>
                 <td style="border: 1px solid black; padding: 5px;">${i + 1}</td>
-                <td style="border: 1px solid black; padding: 5px;">${r[51] || '-'}</td>
+                <td style="border: 1px solid black; padding: 5px;">${r[52] || '-'}</td> <!-- College Merit No (52) -->
                 <td style="border: 1px solid black; padding: 5px; text-align:left;">${r[2]}</td>
-                <td style="border: 1px solid black; padding: 5px;">${r[18] || '-'}</td> <!-- Assuming 18 is State Merit -->
+                <td style="border: 1px solid black; padding: 5px;">${r[18] || '-'}</td> <!-- State Merit No -->
                 <td style="border: 1px solid black; padding: 5px;">${r[19] || '-'}</td>
                 <td style="border: 1px solid black; padding: 5px;">${admitted}</td>
                 <td style="border: 1px solid black; padding: 5px;">${branch}</td>
