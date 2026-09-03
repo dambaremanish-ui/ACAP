@@ -40,7 +40,7 @@ async function fetchVisitedData() {
             return b.jee - a.jee;
         });
         // Assign College Merit Number to Column 52 (Index 51)
-        meritCalc.forEach((item, rank) => data.rows[item.idx][51] = rank + 1);
+        meritCalc.forEach((item, rank) => data.rows[item.idx][52] = rank + 1);
 
         allVisited = { headers: headers, rows: data.rows };
         populateAdvancedFilters(data.rows); handleVisitedSearch();
@@ -77,14 +77,14 @@ function renderVisitedTable() {
     const data = filteredVisited.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
     if(data.length === 0) return document.getElementById('visitedResults').innerHTML = '<p>No records match criteria.</p>';
 
-    let html = '<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(51)">Merit No ${sortCol === 51 ? (sortAsc ? "↑" : "↓") : ""}</th>';
+    let html = '<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(52)">Merit No ${sortCol === 51 ? (sortAsc ? "↑" : "↓") : ""}</th>';
     const displayCols = [1, 2, 9, 19, 47, 49]; // Added Quota and Status
     const colNames = {1:'App ID', 2:'Name', 9:'Seat Type', 19:'CET', 47:'Quota', 49:'Status'};
     displayCols.forEach(i => { html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]}${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; });
     html += '<th>Actions</th></tr>';
 
     data.forEach((row, idx) => {
-        html += `<tr><td><strong>${row[51]}</strong></td>`;
+        html += `<tr><td><strong>${row[52]}</strong></td>`;
         displayCols.forEach(i => {
            if(i===2) html += `<td><b>${row[i]}</b></td>`; else if (i===9 || i===47) html += `<td><span class="badge">${row[i]}</span></td>`; else if (i===49) html += `<td><b>${row[i]}</b></td>`; else html += `<td>${row[i] || '-'}</td>`;
         });
