@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<style>
+    @media print {
+        body { padding: 0 !important; background: white; }
+        .top-panel, .btn-primary { display: none !important; }
+        .data-panel { box-shadow: none; border: none; padding: 0; margin: 0; max-width: 100%; }
+        table { border: 1px solid black; }
+        th, td { border: 1px solid black; padding: 8px; color: black; font-size: 11px; }
+        .print-header { text-align: center; font-size: 16px; font-weight: bold; margin: 20px 0 10px 0; }
+    }
+    .print-header { display: none; } /* Hidden unless printing */
+    @media print { .print-header { display: block; } }
+</style>
+</head>
+<body>
+  <div class="data-panel" style="max-width: 1000px;">
+    <div id="reportsContent">Loading data for reports...</div>
+  </div>
+  <script src="js/api.js"></script><script src="js/layout.js"></script><script src="js/reports.js"></script>
+</body>
+</html>
