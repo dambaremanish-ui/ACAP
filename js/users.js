@@ -44,12 +44,13 @@ function openUserModal(username = null) {
         <label style="font-weight:bold; font-size:0.875rem; margin-top:10px; display:block; margin-bottom:5px;">Tab Access</label>
         <div class="checkbox-grid">
             <label><input type="checkbox" class="cb-perm" value="search" ${uData.permissions.includes('search')?'checked':''}> Search & Allocate</label>
-            <label><input type="checkbox" class="cb-perm" value="applied" ${uData.permissions.includes('applied')?'checked':''}> Applied List</label>
+            <label><input type="checkbox" class="cb-perm" value="visited" ${uData.permissions.includes('visited')?'checked':''}> Visited List</label>
             <label><input type="checkbox" class="cb-perm" value="admitted" ${uData.permissions.includes('admitted')?'checked':''}> Admitted</label>
             <label><input type="checkbox" class="cb-perm" value="logs" ${uData.permissions.includes('logs')?'checked':''}> Logs</label>
             <label><input type="checkbox" class="cb-perm" value="vacancy" ${uData.permissions.includes('vacancy')?'checked':''}> Vacancy Stats</label>
             <label><input type="checkbox" class="cb-perm" value="settings" ${uData.permissions.includes('settings')?'checked':''}> Settings</label>
             <label><input type="checkbox" class="cb-perm" value="users" ${uData.permissions.includes('users')?'checked':''}> User Management</label>
+            <label><input type="checkbox" class="cb-perm" value="reports" ${uData.permissions.includes('reports')?'checked':''}> Reports</label>
         </div>
         <div style="margin-top:15px; display:flex; justify-content:space-between;"><button class="btn-success" onclick="saveUserModal(event)">Save User</button>${isEdit ? `<button class="btn-danger" onclick="deleteUserModal('${uData.username}', event)">Delete User</button>` : ''}</div>
     </div>`;
