@@ -29,21 +29,20 @@ async function fetchReportData() {
     }
 }
 
+// ... existing reports.js fetchReportData() and initialization ...
+
 function buildTableHTML(title, quotaFilter, dateFilter) {
     // 1. Filter with robust Date formatting and Quota matching
     const data = visitedRows.filter(r => {
-        if (!r[51] || !r[47]) return false; // Skip if Date (51) or Quota (47) is missing
+        if (!r[51] || !r[47]) return false; 
         
-        // Safely parse Google's Timestamp into YYYY-MM-DD
         let rowDateStr = "";
         const d = new Date(r[51]);
         if (!isNaN(d.getTime())) {
             rowDateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
         } else {
-            rowDateStr = r[51].toString().split('T')[0]; // Fallback string split
+            rowDateStr = r[51].toString().split('T')[0]; 
         }
-        
-        // Compare dates and safely compare Quotas (ignoring case/spaces)
         return rowDateStr === dateFilter && r[47].toString().trim().toUpperCase() === quotaFilter.toUpperCase();
     });
     
@@ -72,9 +71,9 @@ function buildTableHTML(title, quotaFilter, dateFilter) {
             let reason = r[48] || '-'; 
             html += `<tr>
                 <td style="border: 1px solid black; padding: 5px;">${i + 1}</td>
-                <td style="border: 1px solid black; padding: 5px;">${r[0] || '-'}</td> <!-- ALWAYS READ COLUMN A FOR MERIT -->
+                <td style="border: 1px solid black; padding: 5px;">${r[5] || '-'}</td> <!-- READ COLUMN F (Index 5) FOR PERMANENT MERIT -->
                 <td style="border: 1px solid black; padding: 5px; text-align:left; word-wrap: break-word;">${r[2]}</td>
-                <td style="border: 1px solid black; padding: 5px;">${r[18] || '-'}</td> <!-- State Merit No -->
+                <td style="border: 1px solid black; padding: 5px;">${r[18] || '-'}</td> 
                 <td style="border: 1px solid black; padding: 5px;">${r[19] || '-'}</td>
                 <td style="border: 1px solid black; padding: 5px;">${admitted}</td>
                 <td style="border: 1px solid black; padding: 5px; word-wrap: break-word;">${branch}</td>
@@ -85,6 +84,7 @@ function buildTableHTML(title, quotaFilter, dateFilter) {
     return html + `</table>`;
 }
 
+// ... existing reports.js generateReport() ...
 function generateReport() {
     const selectedDate = document.getElementById('reportDate').value;
     if(!selectedDate) return alert("Select a date first.");
