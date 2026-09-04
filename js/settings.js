@@ -28,3 +28,15 @@ async function saveSettings(e) {
     try { await callAPI('saveSettings', s); alert("Limits saved."); btn.innerText = "Save Constraints"; btn.disabled = false;
     } catch (err) { alert("Error: " + err.message); btn.innerText = "Save Constraints"; btn.disabled = false; }
 }
+async function triggerMeritGeneration(e) {
+    if (!confirm("This will permanently re-sort the database and lock Merit Numbers. Proceed?")) return;
+    const btn = e.target; btn.innerText = "Processing Merit Logic (Please wait)..."; btn.disabled = true;
+    try {
+        const res = await callAPI('generateMerit');
+        alert(res);
+        btn.innerText = "⚡ Generate & Lock Global Merit"; btn.disabled = false;
+    } catch (err) {
+        alert("Error: " + err.message);
+        btn.innerText = "⚡ Generate & Lock Global Merit"; btn.disabled = false;
+    }
+}
