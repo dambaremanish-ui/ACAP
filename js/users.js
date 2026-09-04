@@ -45,6 +45,7 @@ function openUserModal(username = null) {
         <div class="checkbox-grid">
             <label><input type="checkbox" class="cb-perm" value="search" ${uData.permissions.includes('search')?'checked':''}> Search & Allocate</label>
             <label><input type="checkbox" class="cb-perm" value="visited" ${uData.permissions.includes('visited')?'checked':''}> Visited List</label>
+            <label><input type="checkbox" class="cb-perm" value="applied" ${uData.permissions.includes('applied')?'checked':''}> Applied List</label>
             <label><input type="checkbox" class="cb-perm" value="admitted" ${uData.permissions.includes('admitted')?'checked':''}> Admitted</label>
             <label><input type="checkbox" class="cb-perm" value="logs" ${uData.permissions.includes('logs')?'checked':''}> Logs</label>
             <label><input type="checkbox" class="cb-perm" value="vacancy" ${uData.permissions.includes('vacancy')?'checked':''}> Vacancy Stats</label>
