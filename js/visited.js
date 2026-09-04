@@ -18,37 +18,43 @@ window.onload = async () => {
 };
 
 async function fetchVisitedData() {
-    document.getElementById('visitedResults').innerHTML = '<p>Loading and Calculating Merit (HSC > Diploma > OMS Last)...</p>';
+    document.getElementById('visitedResults').innerHTML = '<p>Loading Visited Database...</p>';
     try {
         const data = await callAPI('getVisitedData');
         if (!data.rows || data.rows.length <= 1) { document.getElementById('visitedResults').innerHTML = '<p>No data.</p>'; return; }
         let headers = data.rows.shift();
         
-        // --- UPDATED MERIT LOGIC (HSC > Diploma > OMS) ---
-        let meritCalc = data.rows.map((r, i) => {
-            let qual = (r[15] || '').toString().toUpperCase(); // Column P is index 15
-            return {
-                idx: i,
-                isDiploma: qual.includes('DIPLOMA') ? 1 : 0, // HSC is 0 (Top), Diploma is 1 (Bottom)
-                isOMS: generateSeatType(r[3], r[8], r[6]) === 'OMS' ? 1 : 0, 
-                cet: parseFloat(r[19]) || 0,
-                jee: parseFloat(r[23]) || 0
-            }
-        });
-        
-        meritCalc.sort((a, b) => {
-            if (a.isDiploma !== b.isDiploma) return a.isDiploma - b.isDiploma; // 1. HSC vs Diploma
-            if (a.isOMS !== b.isOMS) return a.isOMS - b.isOMS;                 // 2. Non-OMS vs OMS
-            if (b.cet !== a.cet) return b.cet - a.cet;                         // 3. CET Score
-            return b.jee - a.jee;                                              // 4. JEE Score
-        });
-        
-        // Assign College Merit Number to Index 52
-        meritCalc.forEach((item, rank) => data.rows[item.idx][52] = rank + 1);
-
+        // FAST MODE: Database provides the Merit in r[0] natively. No sorting needed here.
         allVisited = { headers: headers, rows: data.rows };
         populateAdvancedFilters(data.rows); handleVisitedSearch();
     } catch (e) { document.getElementById('visitedResults').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; }
+}
+
+// Ensure setSort handles Column 0 (Merit)
+function renderVisitedTable() {
+    const data = filteredVisited.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
+    if(data.length === 0) return document.getElementById('visitedResults').innerHTML = '<p>No records match criteria.</p>';
+
+    let html = `<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(0)">Merit No ${sortCol === 0 ? (sortAsc ? "↑" : "↓") : ""}</th>`;
+    const displayCols = [1, 2, 9, 19, 47, 49]; 
+    const colNames = {1:'App ID', 2:'Name', 9:'Seat Type', 19:'CET', 47:'Quota', 49:'Status'};
+    
+    displayCols.forEach(i => { html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]}${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; });
+    html += '<th>Actions</th></tr>';
+
+    data.forEach((row, idx) => {
+        html += `<tr><td><strong>${row[0]}</strong></td>`; // ALWAYS READ COLUMN A
+        displayCols.forEach(i => {
+           if(i===2) html += `<td><b>${row[i]}</b></td>`; else if (i===9 || i===47) html += `<td><span class="badge">${row[i]}</span></td>`; else if (i===49) html += `<td><b>${row[i]}</b></td>`; else html += `<td>${row[i] || '-'}</td>`;
+        });
+        const absoluteIndex = allVisited.rows.indexOf(row);
+        html += `<td>`;
+        if (row[49] === "Visited") {
+            html += `<button style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="openEditForm(${absoluteIndex})">Edit</button><button class="btn-danger" style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="markNotInterested('${row[1]}')">Not Interested</button><button class="btn-success" style="padding:6px; font-size:0.8rem;" onclick="openAdmitForm('${row[1]}')">Admit</button>`;
+        } else { html += `<span style="color:#6b7280; font-size:0.8rem;">Locked</span>`; }
+        html += `</td></tr>`;
+    });
+    document.getElementById('visitedResults').innerHTML = html + '</table></div>'; renderPagination(filteredVisited.length);
 }
 
 function populateAdvancedFilters(data) {
@@ -75,46 +81,6 @@ function sortVisitedData() {
         if (vA !== "" && vB !== "" && !isNaN(vA) && !isNaN(vB)) { vA = Number(vA); vB = Number(vB); } else { vA = vA ? vA.toString().toLowerCase() : ''; vB = vB ? vB.toString().toLowerCase() : ''; }
         if(vA < vB) return sortAsc ? -1 : 1; if(vA > vB) return sortAsc ? 1 : -1; return 0;
     });
-}
-
-function renderVisitedTable() {
-    const data = filteredVisited.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
-    if(data.length === 0) return document.getElementById('visitedResults').innerHTML = '<p>No records match criteria.</p>';
-
-    // FIX: Using backticks (``) instead of single quotes ('') so the template expression evaluates correctly
-    let html = `<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(52)">Merit No ${sortCol === 52 ? (sortAsc ? "↑" : "↓") : ""}</th>`;
-    
-    const displayCols = [1, 2, 9, 19, 47, 49]; 
-    const colNames = {1:'App ID', 2:'Name', 9:'Seat Type', 19:'CET', 47:'Quota', 49:'Status'};
-    
-    displayCols.forEach(i => { 
-        html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]}${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; 
-    });
-    html += '<th>Actions</th></tr>';
-
-    data.forEach((row, idx) => {
-        html += `<tr><td><strong>${row[52]}</strong></td>`;
-        displayCols.forEach(i => {
-           if(i===2) html += `<td><b>${row[i]}</b></td>`; 
-           else if (i===9 || i===47) html += `<td><span class="badge">${row[i]}</span></td>`; 
-           else if (i===49) html += `<td><b>${row[i]}</b></td>`; 
-           else html += `<td>${row[i] || '-'}</td>`;
-        });
-        const absoluteIndex = allVisited.rows.indexOf(row);
-        
-        html += `<td>`;
-        if (row[49] === "Visited") {
-            html += `<button style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="openEditForm(${absoluteIndex})">Edit</button>`;
-            html += `<button class="btn-danger" style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="markNotInterested('${row[1]}')">Not Interested</button>`;
-            html += `<button class="btn-success" style="padding:6px; font-size:0.8rem;" onclick="openAdmitForm('${row[1]}')">Admit</button>`;
-        } else { 
-            html += `<span style="color:#6b7280; font-size:0.8rem;">Locked</span>`; 
-        }
-        html += `</td></tr>`;
-    });
-    
-    document.getElementById('visitedResults').innerHTML = html + '</table></div>'; 
-    renderPagination(filteredVisited.length);
 }
 
 // -- Not Interested Logic --
