@@ -1,23 +1,49 @@
+let visitedRows = [];
+
+window.onload = async () => {
+    const actionBar = `
+        <div style="display:flex; gap:10px; width:100%; align-items:center;">
+            <label style="font-weight:bold;">Select Visit Date:</label>
+            <input type="date" id="reportDate" value="${new Date().toISOString().split('T')[0]}" style="flex-grow:1;">
+            <button class="btn-success" onclick="generateReport()">Generate Document</button>
+            <button style="background:#4F46E5;" onclick="window.print()">🖨 Print Reports</button>
+        </div>`;
+    loadMasterLayout('Date-wise Reports', 'reports', actionBar);
+    await fetchReportData();
+};
+
 async function fetchReportData() {
     try {
         const data = await callAPI('getVisitedData');
         if (data.rows && data.rows.length > 1) {
-            data.rows.shift(); 
+            data.rows.shift(); // Remove headers
+            
             // LIGHTNING FAST: Merit is already locked in Column A (r[0]). We just read the data now.
             visitedRows = data.rows; 
             generateReport();
-        } else { document.getElementById('reportsContent').innerHTML = '<p>No data available to report.</p>'; }
-    } catch (e) { document.getElementById('reportsContent').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; }
+        } else { 
+            document.getElementById('reportsContent').innerHTML = '<p>No data available to report.</p>'; 
+        }
+    } catch (e) { 
+        document.getElementById('reportsContent').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; 
+    }
 }
 
 function buildTableHTML(title, quotaFilter, dateFilter) {
+    // 1. Filter with robust Date formatting and Quota matching
     const data = visitedRows.filter(r => {
-        if (!r[51] || !r[47]) return false;
+        if (!r[51] || !r[47]) return false; // Skip if Date (51) or Quota (47) is missing
+        
+        // Safely parse Google's Timestamp into YYYY-MM-DD
         let rowDateStr = "";
         const d = new Date(r[51]);
-        if (!isNaN(d.getTime())) rowDateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-        else rowDateStr = r[51].toString().split('T')[0];
+        if (!isNaN(d.getTime())) {
+            rowDateStr = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+        } else {
+            rowDateStr = r[51].toString().split('T')[0]; // Fallback string split
+        }
         
+        // Compare dates and safely compare Quotas (ignoring case/spaces)
         return rowDateStr === dateFilter && r[47].toString().trim().toUpperCase() === quotaFilter.toUpperCase();
     });
     
@@ -48,7 +74,7 @@ function buildTableHTML(title, quotaFilter, dateFilter) {
                 <td style="border: 1px solid black; padding: 5px;">${i + 1}</td>
                 <td style="border: 1px solid black; padding: 5px;">${r[0] || '-'}</td> <!-- ALWAYS READ COLUMN A FOR MERIT -->
                 <td style="border: 1px solid black; padding: 5px; text-align:left; word-wrap: break-word;">${r[2]}</td>
-                <td style="border: 1px solid black; padding: 5px;">${r[18] || '-'}</td>
+                <td style="border: 1px solid black; padding: 5px;">${r[18] || '-'}</td> <!-- State Merit No -->
                 <td style="border: 1px solid black; padding: 5px;">${r[19] || '-'}</td>
                 <td style="border: 1px solid black; padding: 5px;">${admitted}</td>
                 <td style="border: 1px solid black; padding: 5px; word-wrap: break-word;">${branch}</td>
@@ -57,4 +83,14 @@ function buildTableHTML(title, quotaFilter, dateFilter) {
         });
     }
     return html + `</table>`;
+}
+
+function generateReport() {
+    const selectedDate = document.getElementById('reportDate').value;
+    if(!selectedDate) return alert("Select a date first.");
+    
+    let reportHTML = buildTableHTML("तक्ता-१", "ACAP", selectedDate);
+    reportHTML += buildTableHTML("तक्ता-२", "Institute Level", selectedDate);
+    
+    document.getElementById('reportsContent').innerHTML = reportHTML;
 }
