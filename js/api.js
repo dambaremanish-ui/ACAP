@@ -10,12 +10,25 @@ async function callAPI(action, data = {}) {
     const finalUrl = `${API_URL}?payload=${encodedPayload}`;
     
     try {
-        const response = await fetch(finalUrl, { method: 'GET' });
-        const result = await response.json();
+        // THE FIX: 'credentials: omit' forces an anonymous request, bypassing the Google multi-account bug
+        const response = await fetch(finalUrl, { 
+            method: 'GET',
+            credentials: 'omit' 
+        });
+        
+        const textResponse = await response.text(); 
+        let result;
+        try { 
+            result = JSON.parse(textResponse); 
+        } catch (e) {
+            console.error("Server returned non-JSON response:", textResponse);
+            throw new Error("Server returned an HTML page. Check your Apps Script deployment permissions.");
+        }
+        
         if (result.status === 'success') return result.data;
         throw new Error(result.message);
-    } catch (err) {
-        console.error("API Error:", err);
-        throw err;
+    } catch (err) { 
+        console.error("API Error:", err); 
+        throw err; 
     }
 }
