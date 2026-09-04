@@ -1,4 +1,4 @@
-let allVisited = { headers: [], rows: [] }, filteredVisited = [], currentPage = 1;
+let allVisited = { headers: [], rows: [] }, filteredVisited = [], currentPage = 1, masterOptions = [];
 const ROWS_PER_PAGE = 50; let sortCol = 5, sortAsc = true; // Default sort by Index 5 (Merit No)
 
 window.onload = async () => {
@@ -22,7 +22,7 @@ async function fetchVisitedData() {
         const data = await callAPI('getVisitedData');
         if (!data.rows || data.rows.length <= 1) { document.getElementById('visitedResults').innerHTML = '<p>No data.</p>'; return; }
         let headers = data.rows.shift();
-        
+        masterOptions = data.options || []; // Capture the branch list
         allVisited = { headers: headers, rows: data.rows };
         populateAdvancedFilters(data.rows); handleVisitedSearch();
     } catch (e) { document.getElementById('visitedResults').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; }
@@ -123,12 +123,44 @@ async function submitAdmit(appId, quota, e) {
 function openEditForm(idx) {
     const student = allVisited.rows[idx];
     let html = `<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;"><div style="display:flex; justify-content:space-between; align-items:center;"><h4 style="margin:0;">Edit Prefs: <span style="color:var(--primary)">${student[2]}</span></h4><button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModalVisited').innerHTML=''">Cancel</button></div><div class="pref-grid">`;
-    for(let i=1; i<=7; i++) html += `<div><label style="display:block; font-weight:600; margin-bottom:0.5rem;">Pref ${i}</label><select id="edit_pref${i}" class="edit-select"></select></div>`;
+    
+    // Added onchange event to trigger the smart dropdowns
+    for(let i=1; i<=7; i++) html += `<div><label style="display:block; font-weight:600; margin-bottom:0.5rem;">Pref ${i}</label><select id="edit_pref${i}" class="edit-select" onchange="updateEditDropdowns()"></select></div>`;
+    
     html += `</div><button onclick="submitEdit('${student[1]}', event)" style="width:100%; padding:12px;">Save Edited Preferences</button></div>`;
     document.getElementById('actionModalVisited').innerHTML = html;
-    for(let i=1; i<=7; i++) { let sel = document.getElementById(`edit_pref${i}`); let currentVal = student[i+39] || ''; sel.innerHTML = `<option value="${currentVal}">${currentVal}</option>`; }
+    
+    // Temporarily load their existing saved preferences so the update function can read them
+    for(let i=1; i<=7; i++) { 
+        let sel = document.getElementById(`edit_pref${i}`); 
+        let currentVal = student[i+39] || ''; 
+        sel.innerHTML = `<option value="${currentVal}">${currentVal}</option>`;
+        sel.value = currentVal;
+    }
+    
+    updateEditDropdowns(); // Rebuild the lists with master options
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
+function updateEditDropdowns() {
+    const selects = document.querySelectorAll('.edit-select');
+    const selectedVals = Array.from(selects).map(s => s.value).filter(v => v !== "");
+    selects.forEach(select => {
+        const curr = select.value; 
+        select.innerHTML = '<option value="">-- Select --</option>'; 
+        masterOptions.forEach(opt => { 
+            if (!selectedVals.includes(opt) || opt === curr) { 
+                let el = document.createElement('option'); el.value = opt; el.text = opt; 
+                if (opt === curr) el.selected = true; select.appendChild(el); 
+            }
+        });
+        // Fallback: If they had a custom legacy branch saved that isn't in the options list anymore
+        if (curr && !masterOptions.includes(curr)) {
+            let el = document.createElement('option'); el.value = curr; el.text = curr; el.selected = true; select.appendChild(el);
+        }
+    });
+}
+
 async function submitEdit(appId, e) {
     let prefs = []; if(!document.getElementById(`edit_pref1`).value) return alert('Preference 1 is required.');
     for(let i=1; i<=7; i++) prefs.push(document.getElementById(`edit_pref${i}`).value || "");
