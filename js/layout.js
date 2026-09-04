@@ -2,7 +2,7 @@ function loadMasterLayout(pageTitle, activeTab, actionBarHTML) {
     document.head.innerHTML += `
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="css/style.css">
-        <link rel="icon" type="image/x-icon" href="favicon.ico">
+        <link rel="icon" type="image/x-icon" href="icons/favicon.ico">
         <link rel="icon" type="image/svg+xml" href="icons/logo.svg">
         <link rel="apple-touch-icon" href="icons/icon-192.png">
         <link rel="manifest" href="manifest.json">
