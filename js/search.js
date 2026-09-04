@@ -1,7 +1,6 @@
 let allStudents = [], masterOptions = [], adminSettings = {}, filteredStudents = [];
-let currentPage = 1, sessionData = {};
+let currentPage = 1, sessionData = {}, sortCol = 5, sortAsc = true; // Default sort by Col F (Index 5)
 const ROWS_PER_PAGE = 50;
-let sortCol = -1, sortAsc = true;
 
 window.onload = async () => {
     const actionBar = `<input type="text" id="searchBox" placeholder="Search by student name..." style="flex-grow:1;"><button id="syncBtn">↻ Sync Database</button>`;
@@ -95,8 +94,9 @@ function renderTable() {
     
     let html = `<div style="overflow-x:auto;"><table><tr>`;
     
-    const displayCols = [0, 1, 2, 3, 8, 9, 19, 23];
-    const colNames = {0:'Merit No', 1:'App ID', 2:'Name', 3:'Gender', 8:'Category', 9:'Seat Type', 19:'CET', 23:'JEE'};
+    // Index 5 is now the Merit Number column
+    const displayCols = [5, 1, 2, 3, 8, 9, 19, 23];
+    const colNames = {5:'Merit No', 1:'App ID', 2:'Name', 3:'Gender', 8:'Category', 9:'Seat Type', 19:'CET', 23:'JEE'};
     
     displayCols.forEach(i => { 
         html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]} ${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; 
@@ -105,7 +105,7 @@ function renderTable() {
     
     data.forEach((r) => {
         const seatType = r[9] || generateSeatType(r[3], r[8], r[6]); 
-        html += `<tr><td><strong>${r[0]}</strong></td><td>${r[1]}</td><td><strong>${r[2]}</strong></td><td>${r[3]}</td><td>${r[8]}</td>
+        html += `<tr><td><strong>${r[5] || '-'}</strong></td><td>${r[1]}</td><td><strong>${r[2]}</strong></td><td>${r[3]}</td><td>${r[8]}</td>
                  <td><span class="badge">${seatType}</span></td><td>${r[19] || '-'}</td><td>${r[23] || '-'}</td>
                  <td><button onclick="openAllocation('${r[1]}')">Allocate</button></td></tr>`;
     });
@@ -120,8 +120,8 @@ function openAllocation(appId) {
     let html = `<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;"><h4 style="margin:0;">Allocate: <span style="color:var(--primary)">${student[2]}</span></h4><button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModal').innerHTML=''">Cancel</button></div>
                 <div style="display:flex; gap:10px; margin-bottom:15px; flex-wrap:wrap; background:#e0e7ff; padding:10px; border-radius:6px;">
+                    <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Merit No</label><input type="text" value="${student[5] || 'Not Generated'}" disabled style="background:#f1f5f9; color:#475569; font-weight:bold;"></div>
                     <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Mobile</label><input type="text" id="allocMobile" value="${student[4] || ''}"></div>
-                    <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Email</label><input type="text" id="allocEmail" value="${student[5] || ''}"></div>
                     <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Seat Type</label><input type="text" id="allocSeatType" value="${autoSeatType}"></div>
                     <div style="flex-grow:1;"><label style="font-size:0.8rem; font-weight:bold;">Admission Quota</label>
                         <select id="allocQuota" style="width:100%;"><option value="ACAP">ACAP</option><option value="Institute Level">Institute Level</option></select>
@@ -152,7 +152,11 @@ async function submitAllocation(appId, e) {
     for(let i=1; i<=7; i++) prefs.push(document.getElementById(`pref${i}`).value || "");
     const quota = document.getElementById('allocQuota').value;
     const student = allStudents.find(r => r[1] === appId); while(student.length < 40) student.push(""); 
-    student[4] = document.getElementById('allocMobile').value; student[5] = document.getElementById('allocEmail').value; student[9] = document.getElementById('allocSeatType').value;
+    
+    // We update Mobile and SeatType, but we DO NOT touch student[5] (Merit No) anymore.
+    student[4] = document.getElementById('allocMobile').value; 
+    student[9] = document.getElementById('allocSeatType').value;
+    
     e.target.innerText = 'Transmitting...'; e.target.disabled = true;
     try { await callAPI('allocateStudent', { student: student, prefs: prefs, quota: quota }); alert('Moved to Visited List.'); document.getElementById('actionModal').innerHTML = ''; await fetchInitialData(); } 
     catch (err) { alert("Error: " + err.message); e.target.innerText = 'Confirm & Move to Visited List'; e.target.disabled = false; }
