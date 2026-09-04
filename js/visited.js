@@ -1,5 +1,5 @@
 let allVisited = { headers: [], rows: [] }, filteredVisited = [], currentPage = 1;
-const ROWS_PER_PAGE = 50; let sortCol = -1, sortAsc = true;
+const ROWS_PER_PAGE = 50; let sortCol = 5, sortAsc = true; // Default sort by Index 5 (Merit No)
 
 window.onload = async () => {
     const actionBar = `
@@ -7,8 +7,7 @@ window.onload = async () => {
             <input type="text" id="visitedSearchBox" placeholder="Search visited students..." style="flex-grow:1;"><button id="syncBtn">↻ Sync</button>
         </div>
         <div class="filter-grid" id="advancedFilters" style="width:100%; margin-top:15px; margin-bottom:0;">
-            <select id="filterQuota"><option value="">All Quotas</option></select>
-            <select id="filterStatus"><option value="">All Statuses</option></select>
+            <select id="filterQuota"><option value="">All Quotas</option></select><select id="filterStatus"><option value="">All Statuses</option></select>
             <div class="score-range"><input type="number" id="minCET" placeholder="Min CET"><input type="number" id="maxCET" placeholder="Max CET"></div>
         </div>`;
     loadMasterLayout('Visited List', 'visited', actionBar);
@@ -24,37 +23,9 @@ async function fetchVisitedData() {
         if (!data.rows || data.rows.length <= 1) { document.getElementById('visitedResults').innerHTML = '<p>No data.</p>'; return; }
         let headers = data.rows.shift();
         
-        // FAST MODE: Database provides the Merit in r[0] natively. No sorting needed here.
         allVisited = { headers: headers, rows: data.rows };
         populateAdvancedFilters(data.rows); handleVisitedSearch();
     } catch (e) { document.getElementById('visitedResults').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; }
-}
-
-// Ensure setSort handles Column 0 (Merit)
-function renderVisitedTable() {
-    const data = filteredVisited.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
-    if(data.length === 0) return document.getElementById('visitedResults').innerHTML = '<p>No records match criteria.</p>';
-
-    let html = `<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(0)">Merit No ${sortCol === 0 ? (sortAsc ? "↑" : "↓") : ""}</th>`;
-    const displayCols = [1, 2, 9, 19, 47, 49]; 
-    const colNames = {1:'App ID', 2:'Name', 9:'Seat Type', 19:'CET', 47:'Quota', 49:'Status'};
-    
-    displayCols.forEach(i => { html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]}${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; });
-    html += '<th>Actions</th></tr>';
-
-    data.forEach((row, idx) => {
-        html += `<tr><td><strong>${row[0]}</strong></td>`; // ALWAYS READ COLUMN A
-        displayCols.forEach(i => {
-           if(i===2) html += `<td><b>${row[i]}</b></td>`; else if (i===9 || i===47) html += `<td><span class="badge">${row[i]}</span></td>`; else if (i===49) html += `<td><b>${row[i]}</b></td>`; else html += `<td>${row[i] || '-'}</td>`;
-        });
-        const absoluteIndex = allVisited.rows.indexOf(row);
-        html += `<td>`;
-        if (row[49] === "Visited") {
-            html += `<button style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="openEditForm(${absoluteIndex})">Edit</button><button class="btn-danger" style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="markNotInterested('${row[1]}')">Not Interested</button><button class="btn-success" style="padding:6px; font-size:0.8rem;" onclick="openAdmitForm('${row[1]}')">Admit</button>`;
-        } else { html += `<span style="color:#6b7280; font-size:0.8rem;">Locked</span>`; }
-        html += `</td></tr>`;
-    });
-    document.getElementById('visitedResults').innerHTML = html + '</table></div>'; renderPagination(filteredVisited.length);
 }
 
 function populateAdvancedFilters(data) {
@@ -70,7 +41,7 @@ function handleVisitedSearch() {
         let cet = parseFloat(r[19]) || 0;
         return (r[2]||'').toString().toLowerCase().includes(q) && (!quota || r[47]===quota) && (!status || r[49]===status) && (cet >= minC && cet <= maxC);
     });
-    currentPage = 1; document.getElementById('actionModalVisited').innerHTML = ''; sortVisitedData(); renderVisitedTable();
+    currentPage = 1; sortVisitedData(); renderVisitedTable();
 }
 
 function setSort(idx) { if (sortCol === idx) sortAsc = !sortAsc; else { sortCol = idx; sortAsc = true; } sortVisitedData(); renderVisitedTable(); }
@@ -81,6 +52,33 @@ function sortVisitedData() {
         if (vA !== "" && vB !== "" && !isNaN(vA) && !isNaN(vB)) { vA = Number(vA); vB = Number(vB); } else { vA = vA ? vA.toString().toLowerCase() : ''; vB = vB ? vB.toString().toLowerCase() : ''; }
         if(vA < vB) return sortAsc ? -1 : 1; if(vA > vB) return sortAsc ? 1 : -1; return 0;
     });
+}
+
+function renderVisitedTable() {
+    const data = filteredVisited.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
+    if(data.length === 0) return document.getElementById('visitedResults').innerHTML = '<p>No records match criteria.</p>';
+
+    // Now securely reading and sorting by Index 5 (Column F)
+    let html = `<div style="overflow-x:auto;"><table><tr><th style="cursor:pointer;" onclick="setSort(5)">Merit No ${sortCol === 5 ? (sortAsc ? "↑" : "↓") : ""}</th>`;
+    const displayCols = [1, 2, 9, 19, 47, 49]; 
+    const colNames = {1:'App ID', 2:'Name', 9:'Seat Type', 19:'CET', 47:'Quota', 49:'Status'};
+    
+    displayCols.forEach(i => { html += `<th style="cursor:pointer;" onclick="setSort(${i})">${colNames[i]} ${sortCol === i ? (sortAsc ? "↑" : "↓") : ""}</th>`; });
+    html += '<th>Actions</th></tr>';
+
+    data.forEach((row, idx) => {
+        html += `<tr><td><strong>${row[5] || '-'}</strong></td>`; 
+        displayCols.forEach(i => {
+           if(i===2) html += `<td><b>${row[i]}</b></td>`; else if (i===9 || i===47) html += `<td><span class="badge">${row[i]}</span></td>`; else if (i===49) html += `<td><b>${row[i]}</b></td>`; else html += `<td>${row[i] || '-'}</td>`;
+        });
+        const absoluteIndex = allVisited.rows.indexOf(row);
+        html += `<td>`;
+        if (row[49] === "Visited") {
+            html += `<button style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="openEditForm(${absoluteIndex})">Edit</button><button class="btn-danger" style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="markNotInterested('${row[1]}')">Not Interested</button><button class="btn-success" style="padding:6px; font-size:0.8rem;" onclick="openAdmitForm('${row[1]}')">Admit</button>`;
+        } else { html += `<span style="color:#6b7280; font-size:0.8rem;">Locked</span>`; }
+        html += `</td></tr>`;
+    });
+    document.getElementById('visitedResults').innerHTML = html + '</table></div>'; renderPagination(filteredVisited.length);
 }
 
 // -- Not Interested Logic --
@@ -135,15 +133,15 @@ async function submitEdit(appId, e) {
     let prefs = []; if(!document.getElementById(`edit_pref1`).value) return alert('Preference 1 is required.');
     for(let i=1; i<=7; i++) prefs.push(document.getElementById(`edit_pref${i}`).value || "");
     e.target.innerText = 'Updating...'; e.target.disabled = true;
-    try { await callAPI('editPrefs', { appId: appId, prefs: prefs }); alert('Updated!'); document.getElementById('actionModalVisited').innerHTML = ''; await fetchVisitedData();
-    } catch (err) { alert("Update failed: " + err.message); e.target.innerText = 'Save Edited Preferences'; e.target.disabled = false; }
+    try { await callAPI('editPrefs', { appId: appId, prefs: prefs }); alert('Updated!'); document.getElementById('actionModalVisited').innerHTML = ''; await fetchVisitedData(); } 
+    catch (err) { alert("Update failed: " + err.message); e.target.innerText = 'Save Edited Preferences'; e.target.disabled = false; }
 }
 
 function renderPagination(total) {
     const tPages = Math.ceil(total / ROWS_PER_PAGE); const cId = 'visitedPagination'; if(tPages <= 1) return document.getElementById(cId).innerHTML = '';
     let html = '', start = Math.max(1, currentPage - 2), end = Math.min(tPages, currentPage + 2);
     if(currentPage > 1) html += `<button style="background:white; color:var(--text); border:1px solid var(--border);" onclick="changePage(1)">First</button>`;
-    for(let i = start; i <= end; i++) { html += `<button style="${i === currentPage ? 'background:var(--primary); color:white;' : 'background:white; color:var(--text); border:1px solid var(--border);'}" onclick="changePage(${i})">${i}</button>`; }
+    for(let i = start; i <= end; i++) html += `<button style="${i === currentPage ? 'background:var(--primary); color:white;' : 'background:white; color:var(--text); border:1px solid var(--border);'}" onclick="changePage(${i})">${i}</button>`;
     if(currentPage < tPages) html += `<button style="background:white; color:var(--text); border:1px solid var(--border);" onclick="changePage(${tPages})">Last</button>`;
     document.getElementById(cId).innerHTML = html;
 }
