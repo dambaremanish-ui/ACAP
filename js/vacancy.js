@@ -48,7 +48,10 @@ function renderVacancyTable() {
             <td><span class="badge">${r[1]}</span></td>
             <td><span class="badge">${r[2]}</span></td>
             <td style="font-weight:bold; font-size:1.1em;">${r[3]}</td>
-            <td><button onclick="openEditModal('${r[0]}', '${r[1]}', '${r[2]}', ${r[3]})">Edit</button></td>
+            <td>
+                <button style="padding:6px; margin-right:5px; font-size:0.8rem;" onclick="openEditModal('${r[0]}', '${r[1]}', '${r[2]}', ${r[3]})">Edit</button>
+                <button class="btn-danger" style="padding:6px; font-size:0.8rem;" onclick="deleteVacancyRecord('${r[0]}', '${r[1]}', '${r[2]}')">Delete</button>
+            </td>
         </tr>`;
     });
     
@@ -189,5 +192,17 @@ async function submitEditVacancy(branch, quota, seatType, e) {
     } catch (err) {
         alert("Error: " + err.message);
         e.target.innerText = 'Update Vacancy'; e.target.disabled = false;
+    }
+}
+
+async function deleteVacancyRecord(branch, quota, seatType) {
+    if (!confirm(`WARNING: Are you sure you want to permanently delete the vacancy record for ${branch} (${seatType} - ${quota})?`)) return;
+    
+    try {
+        await callAPI('deleteVacancy', { branch: branch, quota: quota, seatType: seatType });
+        alert('Vacancy Deleted Successfully!');
+        await fetchVacancyData(); // Instantly refresh the table
+    } catch (err) {
+        alert("Error: " + err.message);
     }
 }
