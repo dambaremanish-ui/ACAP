@@ -1,81 +1,162 @@
-let allData = { headers: [], rows: [] }, filteredData = [], currentPage = 1;
-const ROWS_PER_PAGE = 50;
+let vacancyRows = [], masterOptions = [];
+const QUOTAS = ['ACAP', 'Institute Level'];
+const ALL_SEAT_TYPES = ['GOPEN', 'LOPEN', 'GOBC', 'LOBC', 'GSC', 'LSC', 'GST', 'LST', 'GSBC', 'LSBC', 'GVJ', 'LVJ', 'GNT1', 'LNT1', 'GNT2', 'LNT2', 'GNT3', 'LNT3', 'OMS'];
 
 window.onload = async () => {
-    const actionBar = `<input type="text" id="searchBox" placeholder="Search branches or seat types..." style="flex-grow:1;"><button class="btn-success" onclick="openAddVacancy()">+ Add Vacancy Data</button><button id="syncBtn">↻ Sync Database</button>`;
-    loadMasterLayout('Vacancy Stats', 'vacancy', actionBar);
-    document.getElementById('syncBtn').addEventListener('click', fetchData);
-    document.getElementById('searchBox').addEventListener('input', handleSearch);
-    await fetchData();
+    const actionBar = `<button class="btn-success" onclick="openAddModal()">+ Add Vacancy</button><button id="syncBtn" onclick="fetchVacancyData()">↻ Sync</button>`;
+    loadMasterLayout('Vacancy Management', 'vacancy', actionBar);
+    await fetchVacancyData();
 };
 
-async function fetchData() {
-    document.getElementById('results').innerHTML = '<p>Loading database...</p>';
+async function fetchVacancyData() {
+    document.getElementById('results').innerHTML = '<p>Loading Vacancy Database...</p>';
     try {
         const data = await callAPI('getVacancyData');
-        if (!data || data.length <= 1) { document.getElementById('results').innerHTML = '<p>No data.</p>'; return; }
-        allData.headers = data.shift(); allData.rows = data; handleSearch();
-    } catch (e) { document.getElementById('results').innerHTML = `<p style="color:red; font-weight:bold;">Error: ${e.message}</p>`; }
+        masterOptions = data.options || [];
+        
+        if (!data.rows || data.rows.length <= 1) { 
+            vacancyRows = []; 
+            document.getElementById('results').innerHTML = '<p>No vacancy records found.</p>'; 
+            return; 
+        }
+        
+        data.rows.shift(); // Remove headers
+        vacancyRows = data.rows;
+        renderVacancyTable();
+    } catch (e) { document.getElementById('results').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; }
 }
 
-function handleSearch() {
-    const q = document.getElementById('searchBox').value.toLowerCase();
-    filteredData = allData.rows.filter(r => r.some(cell => (cell||'').toString().toLowerCase().includes(q)));
-    currentPage = 1; renderTable();
-}
-
-// ... existing vacancy.js ...
-function renderTable() {
-    const data = filteredData.slice((currentPage - 1) * ROWS_PER_PAGE, currentPage * ROWS_PER_PAGE);
-    if(data.length === 0) return document.getElementById('results').innerHTML = '<p>No records found.</p>';
-    let html = '<div style="overflow-x:auto;"><table><tr><th>Sr No</th>';
-    allData.headers.forEach(h => html += `<th>${h}</th>`); html += '</tr>';
-    data.forEach((row, idx) => {
-        html += `<tr><td>${(currentPage - 1) * ROWS_PER_PAGE + idx + 1}</td>`; 
-        row.forEach((cell, i) => { 
-            if(i === 3) html += `<td><strong style="color:var(--primary); font-size:1.1em;">${cell}</strong></td>`; // Changed index because Quota was added
-            else if(i === 1) html += `<td><span class="badge" style="background:#fef3c7; color:#b45309;">${cell}</span></td>`; // Quota badge
-            else html += `<td>${cell}</td>`; 
-        });
-        html += '</tr>'; 
+function renderVacancyTable() {
+    let html = `<div style="overflow-x:auto;"><table>
+        <tr><th>Branch</th><th>Quota</th><th>Seat Type</th><th>Available Seats</th><th>Actions</th></tr>`;
+        
+    vacancyRows.forEach((r) => {
+        html += `<tr>
+            <td><strong>${r[0]}</strong></td>
+            <td><span class="badge">${r[1]}</span></td>
+            <td><span class="badge">${r[2]}</span></td>
+            <td style="font-weight:bold; font-size:1.1em;">${r[3]}</td>
+            <td><button onclick="openEditModal('${r[0]}', '${r[1]}', '${r[2]}', ${r[3]})">Edit</button></td>
+        </tr>`;
     });
-    document.getElementById('results').innerHTML = html + '</table></div>'; renderPagination(filteredData.length);
+    
+    document.getElementById('results').innerHTML = html + '</table></div>';
 }
 
-function openAddVacancy() {
-    let html = `<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;"><div style="display:flex; justify-content:space-between; align-items:center;"><h4 style="margin:0;">Add Vacancy</h4><button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModalVacancy').innerHTML=''">Cancel</button></div>
-        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:15px; margin:1.5rem 0;">
-            <div><label style="display:block; font-weight:600; margin-bottom:0.5rem;">Branch Name</label><input type="text" id="newVacBranch"></div>
-            <div><label style="display:block; font-weight:600; margin-bottom:0.5rem;">Quota</label><select id="newVacQuota"><option value="ACAP">ACAP</option><option value="Institute Level">Institute Level</option></select></div>
-            <div><label style="display:block; font-weight:600; margin-bottom:0.5rem;">Seat Type</label><input type="text" id="newVacSeatType"></div>
-            <div><label style="display:block; font-weight:600; margin-bottom:0.5rem;">Available Seats</label><input type="number" id="newVacCount" min="0"></div>
+function openAddModal() {
+    let html = `<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h4 style="margin:0;">Add Vacancy</h4>
+            <button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModal').innerHTML=''">Cancel</button>
         </div>
-        <button class="btn-success" style="width:100%; padding:12px;" onclick="submitNewVacancy(event)">Save</button></div>`;
-    document.getElementById('actionModalVacancy').innerHTML = html; window.scrollTo({ top: 0, behavior: 'smooth' });
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Quota</label>
+                <select id="vacQuota" style="width:100%;" onchange="updateAddDropdowns()">
+                    ${QUOTAS.map(q => `<option value="${q}">${q}</option>`).join('')}
+                </select>
+            </div>
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Branch</label>
+                <select id="vacBranch" style="width:100%;" onchange="updateAddDropdowns()"></select>
+            </div>
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Seat Type</label>
+                <select id="vacSeatType" style="width:100%;"></select>
+            </div>
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Seat Count</label>
+                <input type="number" id="vacCount" style="width:100%;" min="0" value="0">
+            </div>
+        </div>
+        <button class="btn-success" onclick="submitAddVacancy(event)" style="margin-top:15px; width:100%; padding:12px;">Save Vacancy</button>
+    </div>`;
+    
+    document.getElementById('actionModal').innerHTML = html;
+    updateAddDropdowns(); 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-async function submitNewVacancy(event) {
-    let b = document.getElementById('newVacBranch').value, q = document.getElementById('newVacQuota').value, st = document.getElementById('newVacSeatType').value.toUpperCase(), c = document.getElementById('newVacCount').value;
-    if(!b || !st || !c) return alert("Fill out all fields.");
-    event.target.innerText = 'Saving...'; event.target.disabled = true;
-    try { await callAPI('addVacancy', { branch: b, quota: q, seatType: st, count: c }); alert("Added!"); document.getElementById('actionModalVacancy').innerHTML = ''; await fetchData(); } 
-    catch (err) { alert("Error: " + err.message); event.target.innerText = 'Save'; event.target.disabled = false; }
-}
+function updateAddDropdowns() {
+    const quota = document.getElementById('vacQuota').value;
+    const branchSelect = document.getElementById('vacBranch');
+    const seatSelect = document.getElementById('vacSeatType');
+    
+    let currentBranch = branchSelect.value;
+    
+    // Find branches that still have missing seat types for this quota
+    const availableBranches = masterOptions.filter(b => {
+        const addedSeats = vacancyRows.filter(r => r[0] === b && r[1] === quota).map(r => r[2]);
+        return addedSeats.length < ALL_SEAT_TYPES.length;
+    });
 
-
-
-
-
-function renderPagination(total) {
-    const tPages = Math.ceil(total / ROWS_PER_PAGE); const cId = 'pagination';
-    if(tPages <= 1) return document.getElementById(cId).innerHTML = '';
-    let html = '', start = Math.max(1, currentPage - 2), end = Math.min(tPages, currentPage + 2);
-    if(currentPage > 1) html += `<button style="background:white; color:var(--text); border:1px solid var(--border);" onclick="changePage(1)">First</button>`;
-    for(let i = start; i <= end; i++) {
-        const activeStyle = i === currentPage ? 'background:var(--primary); color:white;' : 'background:white; color:var(--text); border:1px solid var(--border);';
-        html += `<button style="${activeStyle}" onclick="changePage(${i})">${i}</button>`;
+    branchSelect.innerHTML = '<option value="">-- Select Branch --</option>';
+    availableBranches.forEach(b => {
+        let el = document.createElement('option'); el.value = b; el.text = b;
+        if(b === currentBranch) el.selected = true;
+        branchSelect.appendChild(el);
+    });
+    
+    currentBranch = branchSelect.value;
+    seatSelect.innerHTML = '<option value="">-- Select Seat Type --</option>';
+    
+    if (currentBranch) {
+        // Find seat types that haven't been added yet for this specific branch + quota
+        const addedSeats = vacancyRows.filter(r => r[0] === currentBranch && r[1] === quota).map(r => r[2]);
+        const availableSeats = ALL_SEAT_TYPES.filter(st => !addedSeats.includes(st));
+        
+        availableSeats.forEach(st => {
+            let el = document.createElement('option'); el.value = st; el.text = st;
+            seatSelect.appendChild(el);
+        });
     }
-    if(currentPage < tPages) html += `<button style="background:white; color:var(--text); border:1px solid var(--border);" onclick="changePage(${tPages})">Last</button>`;
-    document.getElementById(cId).innerHTML = html;
 }
-function changePage(p) { currentPage = p; renderTable(); }
+
+async function submitAddVacancy(e) {
+    const branch = document.getElementById('vacBranch').value;
+    const quota = document.getElementById('vacQuota').value;
+    const seatType = document.getElementById('vacSeatType').value;
+    const count = document.getElementById('vacCount').value;
+
+    if (!branch || !quota || !seatType || count === "") return alert("Please fill all required fields.");
+
+    e.target.innerText = 'Saving...'; e.target.disabled = true;
+    try {
+        await callAPI('addVacancy', { branch: branch, quota: quota, seatType: seatType, count: count });
+        alert('Vacancy Added Successfully!');
+        document.getElementById('actionModal').innerHTML = '';
+        await fetchVacancyData();
+    } catch (err) {
+        alert("Error: " + err.message);
+        e.target.innerText = 'Save Vacancy'; e.target.disabled = false;
+    }
+}
+
+function openEditModal(branch, quota, seatType, currentCount) {
+    let html = `<div style="background:#e0e7ff; padding:20px; border-radius:8px; border:1px solid #c7d2fe; margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h4 style="margin:0;">Edit Vacancy: <span style="color:var(--primary)">${branch} (${seatType})</span></h4>
+            <button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModal').innerHTML=''">Cancel</button>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Quota</label><input type="text" value="${quota}" disabled style="background:#f1f5f9; width:100%;"></div>
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Vacancy Count</label><input type="number" id="editCount" min="0" value="${currentCount}" style="width:100%;"></div>
+        </div>
+        <button class="btn-success" onclick="submitEditVacancy('${branch}', '${quota}', '${seatType}', event)" style="margin-top:15px; width:100%; padding:12px;">Update Vacancy</button>
+    </div>`;
+    
+    document.getElementById('actionModal').innerHTML = html;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function submitEditVacancy(branch, quota, seatType, e) {
+    const newCount = document.getElementById('editCount').value;
+    if (newCount === "") return alert("Enter a valid count.");
+
+    e.target.innerText = 'Updating...'; e.target.disabled = true;
+    try {
+        await callAPI('editVacancy', { branch: branch, quota: quota, seatType: seatType, count: newCount });
+        alert('Vacancy Updated Successfully!');
+        document.getElementById('actionModal').innerHTML = '';
+        await fetchVacancyData();
+    } catch (err) {
+        alert("Error: " + err.message);
+        e.target.innerText = 'Update Vacancy'; e.target.disabled = false;
+    }
+}
