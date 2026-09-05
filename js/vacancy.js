@@ -12,18 +12,30 @@ async function fetchVacancyData() {
     document.getElementById('results').innerHTML = '<p>Loading Vacancy Database...</p>';
     try {
         const data = await callAPI('getVacancyData');
-        masterOptions = data.options || [];
         
-        if (!data.rows || data.rows.length <= 1) { 
+        // Bulletproof Routing: Detect if API sent the new Object or the old Array
+        let rawRows = [];
+        if (Array.isArray(data)) {
+            masterOptions = []; // Fallback if backend wasn't deployed as New Version
+            rawRows = data;
+        } else {
+            masterOptions = data.options || [];
+            rawRows = data.rows || [];
+        }
+
+        // Check if there is actual data (more than just the header row)
+        if (rawRows.length <= 1) { 
             vacancyRows = []; 
             document.getElementById('results').innerHTML = '<p>No vacancy records found.</p>'; 
             return; 
         }
-        
-        data.rows.shift(); // Remove headers
-        vacancyRows = data.rows;
+
+        rawRows.shift(); // Securely remove the header row
+        vacancyRows = rawRows;
         renderVacancyTable();
-    } catch (e) { document.getElementById('results').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; }
+    } catch (e) { 
+        document.getElementById('results').innerHTML = `<p style="color:red;">Error: ${e.message}</p>`; 
+    }
 }
 
 function renderVacancyTable() {
