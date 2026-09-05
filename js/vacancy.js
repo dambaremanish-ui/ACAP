@@ -55,35 +55,6 @@ function renderVacancyTable() {
     document.getElementById('results').innerHTML = html + '</table></div>';
 }
 
-function openAddModal() {
-    let html = `<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-            <h4 style="margin:0;">Add Vacancy</h4>
-            <button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModal').innerHTML=''">Cancel</button>
-        </div>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Quota</label>
-                <select id="vacQuota" style="width:100%;" onchange="updateAddDropdowns()">
-                    ${QUOTAS.map(q => `<option value="${q}">${q}</option>`).join('')}
-                </select>
-            </div>
-            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Branch</label>
-                <select id="vacBranch" style="width:100%;" onchange="updateAddDropdowns()"></select>
-            </div>
-            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Seat Type</label>
-                <select id="vacSeatType" style="width:100%;"></select>
-            </div>
-            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Seat Count</label>
-                <input type="number" id="vacCount" style="width:100%;" min="0" value="0">
-            </div>
-        </div>
-        <button class="btn-success" onclick="submitAddVacancy(event)" style="margin-top:15px; width:100%; padding:12px;">Save Vacancy</button>
-    </div>`;
-    
-    document.getElementById('actionModal').innerHTML = html;
-    updateAddDropdowns(); 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-}
 
 function updateAddDropdowns() {
     const quota = document.getElementById('vacQuota').value;
@@ -120,6 +91,45 @@ function updateAddDropdowns() {
     }
 }
 
+function openAddModal() {
+    // Safety check: Create the modal container if it doesn't exist
+    let modalContainer = document.getElementById('actionModal');
+    if (!modalContainer) {
+        modalContainer = document.createElement('div');
+        modalContainer.id = 'actionModal';
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.parentNode.insertBefore(modalContainer, resultsDiv);
+    }
+
+    let html = `<div style="background:#f8fafc; padding:20px; border-radius:8px; border:1px solid var(--border); margin-bottom:20px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+            <h4 style="margin:0;">Add Vacancy</h4>
+            <button class="btn-danger" style="margin:0;" onclick="document.getElementById('actionModal').innerHTML=''">Cancel</button>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Quota</label>
+                <select id="vacQuota" style="width:100%;" onchange="updateAddDropdowns()">
+                    ${QUOTAS.map(q => `<option value="${q}">${q}</option>`).join('')}
+                </select>
+            </div>
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Branch</label>
+                <select id="vacBranch" style="width:100%;" onchange="updateAddDropdowns()"></select>
+            </div>
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Seat Type</label>
+                <select id="vacSeatType" style="width:100%;"></select>
+            </div>
+            <div style="flex-grow:1;"><label style="font-weight:bold; font-size:0.8rem;">Seat Count</label>
+                <input type="number" id="vacCount" style="width:100%;" min="0" value="0">
+            </div>
+        </div>
+        <button class="btn-success" onclick="submitAddVacancy(event)" style="margin-top:15px; width:100%; padding:12px;">Save Vacancy</button>
+    </div>`;
+    
+    modalContainer.innerHTML = html;
+    updateAddDropdowns(); 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 async function submitAddVacancy(e) {
     const branch = document.getElementById('vacBranch').value;
     const quota = document.getElementById('vacQuota').value;
@@ -141,6 +151,15 @@ async function submitAddVacancy(e) {
 }
 
 function openEditModal(branch, quota, seatType, currentCount) {
+    // Safety check: Create the modal container if it doesn't exist
+    let modalContainer = document.getElementById('actionModal');
+    if (!modalContainer) {
+        modalContainer = document.createElement('div');
+        modalContainer.id = 'actionModal';
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.parentNode.insertBefore(modalContainer, resultsDiv);
+    }
+
     let html = `<div style="background:#e0e7ff; padding:20px; border-radius:8px; border:1px solid #c7d2fe; margin-bottom:20px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
             <h4 style="margin:0;">Edit Vacancy: <span style="color:var(--primary)">${branch} (${seatType})</span></h4>
@@ -153,7 +172,7 @@ function openEditModal(branch, quota, seatType, currentCount) {
         <button class="btn-success" onclick="submitEditVacancy('${branch}', '${quota}', '${seatType}', event)" style="margin-top:15px; width:100%; padding:12px;">Update Vacancy</button>
     </div>`;
     
-    document.getElementById('actionModal').innerHTML = html;
+    modalContainer.innerHTML = html;
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
